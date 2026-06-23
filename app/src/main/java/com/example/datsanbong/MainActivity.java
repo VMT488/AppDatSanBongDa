@@ -1,5 +1,6 @@
 package com.example.datsanbong;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +31,23 @@ public class MainActivity extends AppCompatActivity {
 
         sanBongAdapter = new SanBongAdapter(mListSanBong);
         rvSanBong.setAdapter(sanBongAdapter);
+
+        sanBongAdapter.setOnItemClickListener(sanBong -> {
+
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            DetailActivity.class
+                    );
+
+            intent.putExtra("tenSan", sanBong.getTenSan());
+            intent.putExtra("diaChi", sanBong.getDiaChi());
+            intent.putExtra("giaSan", sanBong.getGiaSan());
+            intent.putExtra("hinhAnh", sanBong.getHinhAnh());
+
+            startActivity(intent);
+        });
+
     }
 
     private List<SanBong> getMockDataSanBong() {

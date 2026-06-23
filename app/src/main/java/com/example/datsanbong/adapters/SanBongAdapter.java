@@ -14,7 +14,15 @@ import java.util.List;
 public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongViewHolder> {
 
     private List<SanBong> mListSanBong;
+    public interface OnItemClickListener{
+        void onItemClick(SanBong sanBong);
+    }
 
+    private OnItemClickListener listener;
+
+    public void setOnItemClickListener(OnItemClickListener listener){
+        this.listener = listener;
+    }
     public SanBongAdapter(List<SanBong> mListSanBong) {
         this.mListSanBong = mListSanBong;
     }
@@ -35,6 +43,14 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
         holder.txtTenSan.setText(sanBong.getTenSan());
         holder.txtDiaChi.setText(sanBong.getDiaChi());
         holder.txtGiaSan.setText(sanBong.getGiaSan());
+
+        holder.itemView.setOnClickListener(v -> {
+
+            if(listener != null){
+                listener.onItemClick(sanBong);
+            }
+
+        });
     }
 
     @Override
