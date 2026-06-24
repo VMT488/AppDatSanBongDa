@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "159299166565",
+    "project_id": "datsanbong-b6ad1",
+    "storage_bucket": "datsanbong-b6ad1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159299166565:android:e8f122d3213a4c1a2a818c",
+        "android_client_info": {
+          "package_name": "com.example.datsanbong"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHDih2S7NUj_n_QcJKYUCGVH1iObu0CZQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
