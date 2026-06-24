@@ -7,15 +7,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide; // Thư viện dùng để tải ảnh từ URL Firebase
+import com.bumptech.glide.Glide;
 import com.example.datsanbong.R;
 import com.example.datsanbong.models.SanBong;
 import java.util.List;
 
 public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongViewHolder> {
 
-    // Sửa cảnh báo bằng cách thêm 'final' cho mListSanBong
     private final List<SanBong> mListSanBong;
+
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(SanBong sanBong);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
 
     public SanBongAdapter(List<SanBong> mListSanBong) {
         this.mListSanBong = mListSanBong;
@@ -33,26 +42,29 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
         SanBong sanBong = mListSanBong.get(position);
         if (sanBong == null) return;
 
-        // ĐÃ SỬA LỖI: Sử dụng Glide để load chuỗi String URL từ Firebase thay vì setImageResource
         Glide.with(holder.itemView.getContext())
-                .load(sanBong.getHinhAnh()) // getHinhAnh() lúc này trả về String URL
-                .placeholder(R.mipmap.ic_launcher) // Ảnh hiển thị tạm thời trong lúc đợi tải từ mạng
-                .error(R.mipmap.ic_launcher) // Ảnh hiển thị nếu link ảnh bị lỗi
+                .load(sanBong.getHinhAnh())
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
                 .into(holder.imgSanBong);
 
         holder.txtTenSan.setText(sanBong.getTenSan());
         holder.txtDiaChi.setText(sanBong.getDiaChi());
         holder.txtGiaSan.setText(sanBong.getGiaSan());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(sanBong);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        if (mListSanBong != null) return mListSanBong.size();
-        return 0;
+        return mListSanBong != null ? mListSanBong.size() : 0;
     }
 
     public static class SanBongViewHolder extends RecyclerView.ViewHolder {
-        // Sửa cảnh báo bằng cách thêm 'final' cho các View
         private final ImageView imgSanBong;
         private final TextView txtTenSan;
         private final TextView txtDiaChi;

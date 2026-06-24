@@ -48,6 +48,23 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             return true;
         });
+
+        sanBongAdapter.setOnItemClickListener(sanBong -> {
+
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            DetailActivity.class
+                    );
+
+            intent.putExtra("tenSan", sanBong.getTenSan());
+            intent.putExtra("diaChi", sanBong.getDiaChi());
+            intent.putExtra("giaSan", sanBong.getGiaSan());
+            intent.putExtra("hinhAnh", sanBong.getHinhAnh());
+
+            startActivity(intent);
+        });
+
     }
 
     // Hàm lấy dữ liệu thời gian thực từ Cloud Firestore

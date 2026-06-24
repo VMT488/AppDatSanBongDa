@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Quay lại"/>
+
+        <ImageView
+            android:id="@+id/imgDetailSan"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:scaleType="centerCrop"/>
+
+        <TextView
+            android:id="@+id/txtDetailTenSan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:id="@+id/txtDetailDiaChi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"/>
+
+        <TextView
+            android:id="@+id/txtDetailGiaSan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#4CAF50"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/btnChonNgay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chọn ngày đặt sân"
+            android:layout_marginTop="20dp"/>
+
+        <TextView
+            android:id="@+id/txtNgayDat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chưa chọn ngày"
+            android:textSize="16sp"
+            android:layout_marginTop="10dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerGio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:id="@+id/btnDatSan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đặt sân"
+            android:layout_marginTop="20dp"/>
+
+    </LinearLayout>
+
+</ScrollView>
