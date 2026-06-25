@@ -2,14 +2,18 @@ package com.example.datsanbong;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class DetailActivity extends AppCompatActivity {
@@ -17,7 +21,8 @@ public class DetailActivity extends AppCompatActivity {
     private ImageView imgSan;
     private TextView txtTenSan, txtDiaChi, txtGiaSan, txtNgayDat;
     private Button btnChonNgay, btnDatSan;
-    private Spinner spinnerGio;
+    private Spinner spinnerStartTime;
+    private Spinner spinnerEndTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +44,8 @@ public class DetailActivity extends AppCompatActivity {
         btnChonNgay = findViewById(R.id.btnChonNgay);
         btnDatSan = findViewById(R.id.btnDatSan);
 
-        spinnerGio = findViewById(R.id.spinnerGio);
+        spinnerStartTime = findViewById(R.id.spinnerStartTime);
+        spinnerEndTime = findViewById(R.id.spinnerEndTime);
 
         Bundle bundle = getIntent().getExtras();
 
@@ -54,34 +60,59 @@ public class DetailActivity extends AppCompatActivity {
 
         btnDatSan.setOnClickListener(v -> {
 
-            String ngay = txtNgayDat.getText().toString();
-            String gio = spinnerGio.getSelectedItem().toString();
+            String ngayDat = txtNgayDat.getText().toString();
+            String gioBatDau =
+                    spinnerStartTime.getSelectedItem().toString();
 
-            // xử lý đặt sân
+            String gioKetThuc =
+                    spinnerEndTime.getSelectedItem().toString();
+
+            Toast.makeText(
+                    this,
+                    "Ngày: " + ngayDat
+                            + "\nTừ: " + gioBatDau
+                            + "\nĐến: " + gioKetThuc,
+                    Toast.LENGTH_LONG
+            ).show();
+
         });
 
-        String[] gioDa = {
-                "06:00 - 08:00",
-                "08:00 - 10:00",
-                "10:00 - 12:00",
-                "14:00 - 16:00",
-                "16:00 - 18:00",
-                "18:00 - 20:00",
-                "20:00 - 22:00"
-        };
+        ArrayList<String> startTimes = generateTimeSlots();
 
-        ArrayAdapter<String> adapter =
+        ArrayAdapter<String> startAdapter =
                 new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_spinner_item,
-                        gioDa
+                        startTimes
                 );
 
-        adapter.setDropDownViewResource(
+        startAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item
         );
 
-        spinnerGio.setAdapter(adapter);
+        spinnerStartTime.setAdapter(startAdapter);
+
+        spinnerStartTime.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(
+                            AdapterView<?> parent,
+                            View view,
+                            int position,
+                            long id
+                    ) {
+
+                        updateEndTime(position);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                }
+        );
+
     }
 
     private void showDatePicker() {
@@ -112,6 +143,46 @@ public class DetailActivity extends AppCompatActivity {
 
         datePickerDialog.show();
     }
+
+    private ArrayList<String> generateTimeSlots() {
+
+        ArrayList<String> list = new ArrayList<>();
+
+        for(int hour = 7; hour <= 20; hour++) {
+
+            list.add(String.format("%02d:00", hour));
+
+            if(hour != 20){
+                list.add(String.format("%02d:30", hour));
+            }
+        }
+
+        return list;
+    }
+    private void updateEndTime(int startPosition) {
+
+        ArrayList<String> allTimes = generateTimeSlots();
+
+        ArrayList<String> endTimes = new ArrayList<>();
+
+        for(int i = startPosition + 1; i < allTimes.size(); i++) {
+            endTimes.add(allTimes.get(i));
+        }
+
+        ArrayAdapter<String> endAdapter =
+                new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_spinner_item,
+                        endTimes
+                );
+
+        endAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item
+        );
+
+        spinnerEndTime.setAdapter(endAdapter);
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
         finish();
