@@ -38,14 +38,17 @@ public class AdminActivity extends AppCompatActivity {
 
         rvAdminSanBong.setLayoutManager(new LinearLayoutManager(this));
 
-
+        // Khởi tạo Adapter nhận sự kiện xóa sân từ giao diện quản lý
         adapter = new AdminSanBongAdapter(listSanBong, listDocumentIds, (documentId, position) -> xoaSanBongFirestore(documentId));
         rvAdminSanBong.setAdapter(adapter);
 
+        // Bắt đầu lắng nghe thay đổi dữ liệu thời gian thực từ Firestore
         langNgheDuLieuAdmin();
 
+        // Xử lý sự kiện khi ấn nút thêm sân mới
         btnThemSan.setOnClickListener(v -> showDialogThemSan());
     }
+
 
     private void langNgheDuLieuAdmin() {
         db.collection("DanhSachSanBong")
@@ -72,6 +75,7 @@ public class AdminActivity extends AppCompatActivity {
         final EditText edtTen = view.findViewById(R.id.edtTenSan);
         final EditText edtDiaChi = view.findViewById(R.id.edtDiaChi);
         final EditText edtGia = view.findViewById(R.id.edtGiaSan);
+        final EditText edtKhungGio = view.findViewById(R.id.edtKhungGio);
         final EditText edtLinkAnh = view.findViewById(R.id.edtLinkAnh);
 
         builder.setView(view);
@@ -79,20 +83,21 @@ public class AdminActivity extends AppCompatActivity {
             String ten = edtTen.getText().toString().trim();
             String diaChi = edtDiaChi.getText().toString().trim();
             String gia = edtGia.getText().toString().trim();
+            String khungGio = edtKhungGio.getText().toString().trim();
             String linkAnh = edtLinkAnh.getText().toString().trim();
 
-            if (!ten.isEmpty() && !diaChi.isEmpty() && !gia.isEmpty()) {
+            if (!ten.isEmpty() && !diaChi.isEmpty() && !gia.isEmpty() && !khungGio.isEmpty()) {
                 int idNgauNhien = (int) (System.currentTimeMillis() / 1000);
                 String anhSif = linkAnh.isEmpty() ? "https://vietnamisawesome.com/wp-content/uploads/2023/10/san-bong.jpg" : linkAnh;
 
-                SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, gia, anhSif);
+                SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, gia, anhSif, khungGio);
 
                 db.collection("DanhSachSanBong")
                         .add(sanBongMoi)
                         .addOnSuccessListener(documentReference -> Toast.makeText(AdminActivity.this, "Đã thêm sân lên Firebase thành công!", Toast.LENGTH_SHORT).show())
                         .addOnFailureListener(e -> Toast.makeText(AdminActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             } else {
-                Toast.makeText(AdminActivity.this, "Vui lòng điền đủ thông tin!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminActivity.this, "Vui lòng điền đủ thông tin bao gồm cả khung giờ!", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton("Hủy", null);

@@ -47,6 +47,13 @@ public class AdminSanBongAdapter extends RecyclerView.Adapter<AdminSanBongAdapte
         holder.txtDiaChi.setText(sanBong.getDiaChi());
         holder.txtGiaSan.setText(sanBong.getGiaSan());
 
+        // Đổ dữ liệu khung giờ lên giao diện công khai
+        if(sanBong.getKhungGio() != null && !sanBong.getKhungGio().isEmpty()){
+            holder.txtKhungGio.setText("Giờ: " + sanBong.getKhungGio());
+        } else {
+            holder.txtKhungGio.setText("Giờ: Chưa cập nhật");
+        }
+
         holder.btnXoa.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onXoaClick(docId, position);
@@ -61,7 +68,7 @@ public class AdminSanBongAdapter extends RecyclerView.Adapter<AdminSanBongAdapte
 
     public static class AdminViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imgSanBong;
-        private final TextView txtTenSan, txtDiaChi, txtGiaSan;
+        private final TextView txtTenSan, txtDiaChi, txtGiaSan, txtKhungGio;
         private final Button btnXoa;
 
         public AdminViewHolder(@NonNull View itemView) {
@@ -70,6 +77,7 @@ public class AdminSanBongAdapter extends RecyclerView.Adapter<AdminSanBongAdapte
             txtTenSan = itemView.findViewById(R.id.txtAdminTenSan);
             txtDiaChi = itemView.findViewById(R.id.txtAdminDiaChi);
             txtGiaSan = itemView.findViewById(R.id.txtAdminGiaSan);
+            txtKhungGio = itemView.findViewById(R.id.txtAdminKhungGio);
             btnXoa = itemView.findViewById(R.id.btnAdminXoa);
         }
     }
