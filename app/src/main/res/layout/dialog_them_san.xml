@@ -46,6 +46,16 @@
         android:layout_marginBottom="12dp"/>
 
     <EditText
+        android:id="@+id/edtKhungGio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nhập khung giờ (Ví dụ: 06:00 - 22:00)"
+        android:inputType="text"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
         android:id="@+id/edtLinkAnh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
