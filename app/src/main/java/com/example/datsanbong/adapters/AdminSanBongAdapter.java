@@ -11,7 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.datsanbong.R;
 import com.example.datsanbong.models.SanBong;
+
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class AdminSanBongAdapter extends RecyclerView.Adapter<AdminSanBongAdapter.AdminViewHolder> {
 
@@ -45,7 +48,11 @@ public class AdminSanBongAdapter extends RecyclerView.Adapter<AdminSanBongAdapte
         Glide.with(holder.itemView.getContext()).load(sanBong.getHinhAnh()).placeholder(android.R.drawable.ic_menu_gallery).into(holder.imgSanBong);
         holder.txtTenSan.setText(sanBong.getTenSan());
         holder.txtDiaChi.setText(sanBong.getDiaChi());
-        holder.txtGiaSan.setText(sanBong.getGiaSan());
+        NumberFormat formatter =
+                NumberFormat.getInstance(new Locale("vi", "VN"));
+
+        holder.txtGiaSan.setText(
+                formatter.format(sanBong.getGiaSan()) + " VNĐ");
 
         holder.btnXoa.setOnClickListener(v -> {
             if (listener != null) {
