@@ -10,7 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.datsanbong.R;
 import com.example.datsanbong.models.SanBong;
+
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongViewHolder> {
 
@@ -50,7 +53,11 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
 
         holder.txtTenSan.setText(sanBong.getTenSan());
         holder.txtDiaChi.setText(sanBong.getDiaChi());
-        holder.txtGiaSan.setText(sanBong.getGiaSan());
+        NumberFormat formatter =
+                NumberFormat.getInstance(new Locale("vi", "VN"));
+
+        holder.txtGiaSan.setText(
+                formatter.format(sanBong.getGiaSan()) + " VNĐ");
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {

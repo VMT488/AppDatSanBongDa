@@ -12,7 +12,7 @@ import java.util.List;
 
 public class SanBongService {
     private final DatabaseReference reference =
-            FirebaseRealtimeService.getReference("DanhSachSanBong");
+            FirebaseRealtimeService.getReference("SanBong");
 
     public void addSanBong(SanBong sanBong){
 

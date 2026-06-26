@@ -9,8 +9,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.datsanbong.adapters.SanBongAdapter;
 import com.example.datsanbong.models.SanBong;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,14 +24,15 @@ public class MainActivity extends AppCompatActivity {
     private List<SanBong> mListSanBong;
     private EditText edtSearch;
     // Khai báo biến Firestore
-    private FirebaseFirestore db;
+    private DatabaseReference db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        db = FirebaseFirestore.getInstance();
+        db = FirebaseDatabase.getInstance()
+                .getReference("SanBong");
         rvSanBong = findViewById(R.id.rvSanBong);
         edtSearch = findViewById(R.id.edtSearch); // Ánh xạ ô tìm kiếm trong layout của bạn
 
@@ -40,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         rvSanBong.setAdapter(sanBongAdapter);
 
         // Gọi hàm lắng nghe dữ liệu trực tuyến từ Firebase đám mây
-        langNgheDuLieuFirebase();
+        listenFirebase();
 
         //
         edtSearch.setOnLongClickListener(v -> {
@@ -68,24 +72,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Hàm lấy dữ liệu thời gian thực từ Cloud Firestore
-    private void langNgheDuLieuFirebase() {
-        db.collection("DanhSachSanBong")
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        Toast.makeText(MainActivity.this, "Lỗi tải dữ liệu từ Firebase", Toast.LENGTH_SHORT).show();
-                        return;
+    private void listenFirebase() {
+
+        db.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+
+                mListSanBong.clear();
+
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+
+                    SanBong sanBong = dataSnapshot.getValue(SanBong.class);
+
+                    if (sanBong != null) {
+                        mListSanBong.add(sanBong);
                     }
 
-                    if (value != null) {
-                        mListSanBong.clear(); // Xóa danh sách cũ tránh trùng lặp dữ liệu
-                        for (QueryDocumentSnapshot doc : value) {
-                            // Tự động ép kiểu dữ liệu Firebase thành Object Java SanBong
-                            SanBong sanBong = doc.toObject(SanBong.class);
-                            mListSanBong.add(sanBong);
-                        }
-                        // Làm mới danh sách hiển thị trên màn hình User
-                        sanBongAdapter.notifyDataSetChanged();
-                    }
-                });
+                }
+
+                sanBongAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+
+                Toast.makeText(
+                        MainActivity.this,
+                        error.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
+
+            }
+        });
+
     }
 }
