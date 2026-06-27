@@ -46,6 +46,15 @@
                 android:layout_marginTop="4dp" />
 
             <TextView
+                android:id="@+id/txtAdminKhungGio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Giờ: 06:00 - 22:00"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="13sp"
+                android:layout_marginTop="2dp" />
+
+            <TextView
                 android:id="@+id/txtAdminGiaSan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,7 +62,7 @@
                 android:textColor="@android:color/holo_green_dark"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="6dp" />
         </LinearLayout>
 
         <Button
