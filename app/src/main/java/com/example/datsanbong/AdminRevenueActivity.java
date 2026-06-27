@@ -1,11 +1,15 @@
 package com.example.datsanbong;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import android.app.DatePickerDialog;
@@ -14,9 +18,13 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.example.datsanbong.models.Booking;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +39,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +47,14 @@ import java.util.TreeMap;
 
 public class AdminRevenueActivity extends AppCompatActivity {
 
-    private Button btnStartDate, btnEndDate, btnGoToQuanLySan;
+    private Button btnStartDate, btnEndDate;
     private TextView tvTotalRevenue, tvSuccessfulBookings, tvCanceledBookings;
     private BarChart barChartRevenue;
     private DatabaseReference mDatabase;
     private String startDate = "", endDate = "";
-
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,20 +62,38 @@ public class AdminRevenueActivity extends AppCompatActivity {
 
         btnStartDate = findViewById(R.id.btnStartDate);
         btnEndDate = findViewById(R.id.btnEndDate);
-        btnGoToQuanLySan = findViewById(R.id.btnGoToQuanLySan);
         tvTotalRevenue = findViewById(R.id.tvTotalRevenue);
         tvSuccessfulBookings = findViewById(R.id.tvSuccessfulBookings);
         tvCanceledBookings = findViewById(R.id.tvCanceledBookings);
         barChartRevenue = findViewById(R.id.barChartRevenue);
 
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_quan_ly_san) {
+                Intent intent = new Intent(AdminRevenueActivity.this, AdminActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_thong_ke) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
+
         mDatabase = FirebaseDatabase.getInstance().getReference("Bookings");
 
         btnStartDate.setOnClickListener(v -> showDatePicker(true));
         btnEndDate.setOnClickListener(v -> showDatePicker(false));
-        btnGoToRevenue.setOnClickListener(v -> {
-            Intent intent = new Intent(AdminRevenueActivity.this, AdminActivity.class);
-            startActivity(intent);
-        });
+
         loadRevenueData();
     }
 
