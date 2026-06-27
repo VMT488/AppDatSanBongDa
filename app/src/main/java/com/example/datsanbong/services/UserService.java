@@ -4,12 +4,15 @@ import com.example.datsanbong.models.User;
 import com.google.firebase.database.DatabaseReference;
 
 public class UserService {
+
     private final DatabaseReference reference =
             FirebaseRealtimeService.getReference("Users");
 
-    public void register(User user){
+    public void saveUser(User user){
 
-        reference.push().setValue(user);
+        reference.child(user.getUid())
+                .setValue(user);
 
     }
+
 }

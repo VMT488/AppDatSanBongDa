@@ -1,5 +1,6 @@
 package com.example.datsanbong;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,6 +32,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class AdminRevenueActivity extends AppCompatActivity {
 
         btnStartDate.setOnClickListener(v -> showDatePicker(true));
         btnEndDate.setOnClickListener(v -> showDatePicker(false));
-        btnGoToRevenue.setOnClickListener(v -> {
+        btnGoToQuanLySan.setOnClickListener(v -> {
             Intent intent = new Intent(AdminRevenueActivity.this, AdminActivity.class);
             startActivity(intent);
         });

@@ -89,8 +89,8 @@ public class AdminActivity extends AppCompatActivity {
             if (!ten.isEmpty() && !diaChi.isEmpty() && !gia.isEmpty() && !khungGio.isEmpty()) {
                 int idNgauNhien = (int) (System.currentTimeMillis() / 1000);
                 String anhSif = linkAnh.isEmpty() ? "https://vietnamisawesome.com/wp-content/uploads/2023/10/san-bong.jpg" : linkAnh;
-
-                SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, gia, anhSif, khungGio);
+                long giaSan = Long.parseLong(gia);
+                SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, giaSan, anhSif, khungGio);
 
                 db.collection("DanhSachSanBong")
                         .add(sanBongMoi)
