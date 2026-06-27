@@ -12,13 +12,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Thống Kê Doanh Thu"
-            android:textSize="24sp"
-            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:text="Thống kê Doanh Thu"
             android:textColor="#333333"
-            android:layout_marginBottom="16dp"/>
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -166,6 +167,14 @@
                     android:id="@+id/barChartRevenue"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"/>
+                <Button
+                    android:id="@+id/btnGoToQuanLySan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Quản lý sân"
+                    android:backgroundTint="#007A33"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="16dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
