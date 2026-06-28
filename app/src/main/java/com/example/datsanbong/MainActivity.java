@@ -2,14 +2,19 @@ package com.example.datsanbong;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.datsanbong.adapters.SanBongAdapter;
 import com.example.datsanbong.models.SanBong;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,11 +50,6 @@ public class MainActivity extends AppCompatActivity {
 
         listenFirebase();
 
-        edtSearch.setOnLongClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AdminActivity.class);
-            startActivity(intent);
-            return true;
-        });
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -85,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
             startActivity(intent);
         });
-
     }
 
     // Hàm lấy dữ liệu thời gian thực từ Cloud Firestore
@@ -123,11 +122,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (bottomNavigationView != null) {
-            bottomNavigationView.setSelectedItemId(R.id.nav_home);
-        }
-    }
+
 }

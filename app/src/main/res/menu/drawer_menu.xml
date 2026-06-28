@@ -10,4 +10,8 @@
         android:id="@+id/nav_quan_ly_san"
         android:icon="@drawable/ic_ball"
         android:title="Quản lý sân bóng" />
+    <item
+        android:id="@+id/nav_manage_customers"
+        android:icon="@drawable/ic_account"
+        android:title="Quản Lý Khách Hàng" />
 </menu>

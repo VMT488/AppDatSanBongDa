@@ -92,6 +92,18 @@ public class AdminRevenueActivity extends AppCompatActivity {
             return true;
         });
 
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_manage_customers) {
+                Intent intent = new Intent(AdminRevenueActivity.this, AdminCustomerActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_thong_ke) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
         mDatabase = FirebaseDatabase.getInstance().getReference("Bookings");
 
         btnStartDate.setOnClickListener(v -> showDatePicker(true));
