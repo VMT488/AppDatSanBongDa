@@ -2,30 +2,36 @@ package com.example.datsanbong;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.datsanbong.models.User;
+import com.google.android.gms.auth.api.signin.*;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.*;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText edtUsername;
     private EditText edtPassword;
-
     private Button btnLogin;
-
+    private Button btnGoogle;
     private TextView txtRegister;
-
     private FirebaseAuth auth;
+    private GoogleSignInClient googleSignInClient;
 
+    private ActivityResultLauncher<Intent> googleLauncher;
     private DatabaseReference userRef;
 
     @Override
@@ -54,6 +60,65 @@ public class LoginActivity extends AppCompatActivity {
             ));
 
         });
+
+        btnGoogle = findViewById(R.id.btnGoogle);
+
+        btnGoogle.setOnClickListener(v->{
+
+            Intent signInIntent =
+                    googleSignInClient.getSignInIntent();
+
+            googleLauncher.launch(signInIntent);
+
+        });
+
+        GoogleSignInOptions gso =
+                new GoogleSignInOptions.Builder(
+                        GoogleSignInOptions.DEFAULT_SIGN_IN
+                )
+                        .requestIdToken(
+                                getString(R.string.default_web_client_id)
+                        )
+                        .requestEmail()
+                        .build();
+
+        googleSignInClient =
+                GoogleSignIn.getClient(this, gso);
+
+        googleLauncher =
+                registerForActivityResult(
+                        new ActivityResultContracts.StartActivityForResult(),
+                        result -> {
+
+                            if(result.getResultCode()!=RESULT_OK)
+                                return;
+
+                            Intent data = result.getData();
+
+                            Task<GoogleSignInAccount> task =
+                                    GoogleSignIn.getSignedInAccountFromIntent(data);
+
+                            try{
+
+                                GoogleSignInAccount account =
+                                        task.getResult(ApiException.class);
+
+                                firebaseAuthWithGoogle(
+                                        account.getIdToken()
+                                );
+
+                            }catch (Exception e){
+
+                                Toast.makeText(
+                                        this,
+                                        e.getMessage(),
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                            }
+
+                        });
+
 
         btnLogin.setOnClickListener(v -> login());
 
@@ -146,6 +211,97 @@ public class LoginActivity extends AppCompatActivity {
                     }
 
                 });
+
+    }
+
+    private void firebaseAuthWithGoogle(String idToken){
+
+        AuthCredential credential =
+                GoogleAuthProvider.getCredential(
+                        idToken,
+                        null
+                );
+
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(task -> {
+
+                    if(!task.isSuccessful()){
+
+                        Toast.makeText(
+                                this,
+                                "Đăng nhập thất bại",
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                        return;
+                    }
+
+                    FirebaseUser firebaseUser =
+                            auth.getCurrentUser();
+
+                    createGoogleUser(firebaseUser);
+
+                });
+
+    }
+
+    private void createGoogleUser(FirebaseUser firebaseUser){
+
+        String uid = firebaseUser.getUid();
+
+        userRef.child(uid)
+                .addListenerForSingleValueEvent(
+                        new ValueEventListener() {
+
+                            @Override
+                            public void onDataChange(DataSnapshot snapshot) {
+
+                                if(snapshot.exists()){
+
+                                    loadUser(uid);
+                                    return;
+
+                                }
+
+                                User user = new User();
+
+                                user.setUid(uid);
+
+                                user.setName(
+                                        firebaseUser.getDisplayName()
+                                );
+
+                                user.setUsername(
+                                        firebaseUser.getEmail()
+                                                .split("@")[0]
+                                );
+
+                                user.setEmail(
+                                        firebaseUser.getEmail()
+                                );
+
+                                user.setPhone("");
+
+                                user.setActive(true);
+
+                                user.setRole("USER");
+
+                                userRef.child(uid)
+                                        .setValue(user)
+                                        .addOnSuccessListener(unused -> {
+
+                                            loadUser(uid);
+
+                                        });
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError error) {
+
+                            }
+
+                        });
 
     }
 

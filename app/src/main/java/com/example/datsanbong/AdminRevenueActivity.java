@@ -97,6 +97,11 @@ public class AdminRevenueActivity extends AppCompatActivity {
         btnStartDate.setOnClickListener(v -> showDatePicker(true));
         btnEndDate.setOnClickListener(v -> showDatePicker(false));
 
+//        if(getSupportActionBar()!=null){
+//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//            getSupportActionBar().setTitle("Thống kê doanh thu");
+//        }
+
         loadRevenueData();
     }
 
