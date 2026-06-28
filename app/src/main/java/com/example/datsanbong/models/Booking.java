@@ -12,7 +12,7 @@ public class Booking {
     private String gioBatDau;
     private String gioKetThuc;
 
-    private double tongTien;
+    private long tongTien;
 
     // PENDING, CONFIRMED, CANCELLED, COMPLETED
     private String trangThai;
@@ -30,7 +30,7 @@ public class Booking {
                    String ngayDat,
                    String gioBatDau,
                    String gioKetThuc,
-                   double tongTien,
+                   long tongTien,
                    String trangThai,
                    long createdAt) {
 
@@ -115,7 +115,7 @@ public class Booking {
         return tongTien;
     }
 
-    public void setTongTien(double tongTien) {
+    public void setTongTien(long tongTien) {
         this.tongTien = tongTien;
     }
 

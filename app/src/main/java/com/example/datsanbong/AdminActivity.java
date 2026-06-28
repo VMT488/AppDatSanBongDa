@@ -83,6 +83,7 @@ public class AdminActivity extends AppCompatActivity {
             String ten = edtTen.getText().toString().trim();
             String diaChi = edtDiaChi.getText().toString().trim();
             String gia = edtGia.getText().toString().trim();
+            long giaLong = Long.parseLong(gia);
             String khungGio = edtKhungGio.getText().toString().trim();
             String linkAnh = edtLinkAnh.getText().toString().trim();
 
