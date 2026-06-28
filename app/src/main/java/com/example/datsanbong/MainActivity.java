@@ -60,7 +60,12 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_home) {
                 return true;
             } else if (id == R.id.nav_profile) {
-                Toast.makeText(MainActivity.this, "Trang cá nhân", Toast.LENGTH_SHORT).show();
+                Intent intent =
+                        new Intent(
+                                MainActivity.this,
+                                ProfileActivity.class
+                        );
+                startActivity(intent);
                 return true;
             }
             return false;
