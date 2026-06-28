@@ -4,13 +4,13 @@ public class SanBong {
     private int id;
     private String tenSan;
     private String diaChi;
-    private String giaSan;
+    private long giaSan;
     private String hinhAnh;
     private String khungGio;
 
     public SanBong() {}
 
-    public SanBong(int id, String tenSan, String diaChi, String giaSan, String hinhAnh, String khungGio) {
+    public SanBong(int id, String tenSan, String diaChi, long giaSan, String hinhAnh, String khungGio) {
         this.id = id;
         this.tenSan = tenSan;
         this.diaChi = diaChi;
@@ -29,8 +29,8 @@ public class SanBong {
     public void setTenSan(String tenSan) { this.tenSan = tenSan; }
     public String getDiaChi() { return diaChi; }
     public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
-    public String getGiaSan() { return giaSan; }
-    public void setGiaSan(String giaSan) { this.giaSan = giaSan; }
+    public long getGiaSan() { return giaSan; }
+    public void setGiaSan(long giaSan) { this.giaSan = giaSan; }
     public String getHinhAnh() { return hinhAnh; }
     public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
 }

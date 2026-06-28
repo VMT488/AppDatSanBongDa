@@ -83,6 +83,7 @@ public class AdminActivity extends AppCompatActivity {
             String ten = edtTen.getText().toString().trim();
             String diaChi = edtDiaChi.getText().toString().trim();
             String gia = edtGia.getText().toString().trim();
+            long giaLong = Long.parseLong(gia);
             String khungGio = edtKhungGio.getText().toString().trim();
             String linkAnh = edtLinkAnh.getText().toString().trim();
 
@@ -90,7 +91,7 @@ public class AdminActivity extends AppCompatActivity {
                 int idNgauNhien = (int) (System.currentTimeMillis() / 1000);
                 String anhSif = linkAnh.isEmpty() ? "https://vietnamisawesome.com/wp-content/uploads/2023/10/san-bong.jpg" : linkAnh;
 
-                SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, gia, anhSif, khungGio);
+                SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, giaLong, anhSif, khungGio);
 
                 db.collection("DanhSachSanBong")
                         .add(sanBongMoi)

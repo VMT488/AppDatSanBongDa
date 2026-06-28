@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DatSanBong</string>
+    <string name="navigation_drawer_open">Mở menu điều hướng</string>
+    <string name="navigation_drawer_close">Đóng menu điều hướng</string>
 </resources>

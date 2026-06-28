@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.datsanbong.adapters.SanBongAdapter;
 import com.example.datsanbong.models.SanBong;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,9 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private SanBongAdapter sanBongAdapter;
     private List<SanBong> mListSanBong;
     private EditText edtSearch;
-    // Khai báo biến Firestore
     private DatabaseReference db;
-
+    private BottomNavigationView bottomNavigationView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance()
                 .getReference("SanBong");
         rvSanBong = findViewById(R.id.rvSanBong);
-        edtSearch = findViewById(R.id.edtSearch); // Ánh xạ ô tìm kiếm trong layout của bạn
-
+        edtSearch = findViewById(R.id.edtSearch);
+        bottomNavigationView = findViewById(R.id.bottomNavigation);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rvSanBong.setLayoutManager(linearLayoutManager);
 
@@ -43,16 +43,28 @@ public class MainActivity extends AppCompatActivity {
         sanBongAdapter = new SanBongAdapter(mListSanBong);
         rvSanBong.setAdapter(sanBongAdapter);
 
-        // Gọi hàm lắng nghe dữ liệu trực tuyến từ Firebase đám mây
         listenFirebase();
 
-        //
         edtSearch.setOnLongClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AdminActivity.class);
             startActivity(intent);
             return true;
         });
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
 
+            if (id == R.id.nav_admin) {
+                Intent intent = new Intent(MainActivity.this, AdminRevenueActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (id == R.id.nav_home) {
+                return true;
+            } else if (id == R.id.nav_profile) {
+                Toast.makeText(MainActivity.this, "Trang cá nhân", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            return false;
+        });
         sanBongAdapter.setOnItemClickListener(sanBong -> {
 
             Intent intent =
@@ -105,6 +117,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        }
     }
 }

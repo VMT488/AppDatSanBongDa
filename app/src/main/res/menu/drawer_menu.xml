@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_thong_ke"
+        android:icon="@drawable/ic_balance"
+        android:title="Thống kê doanh thu" />
+
+    <item
+        android:id="@+id/nav_quan_ly_san"
+        android:icon="@drawable/ic_ball"
+        android:title="Quản lý sân bóng" />
+</menu>
