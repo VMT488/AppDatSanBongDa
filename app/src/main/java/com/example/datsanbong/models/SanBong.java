@@ -1,27 +1,29 @@
 package com.example.datsanbong.models;
 
+import java.util.List;
+
 public class SanBong {
     private int id;
     private String tenSan;
     private String diaChi;
     private long giaSan;
     private String hinhAnh;
-    private String khungGio;
+    // Thay đổi ở đây: Một sân bóng có nhiều khung giờ để lựa chọn
+    private List<KhungGio> danhSachKhungGio;
 
     public SanBong() {}
 
-    public SanBong(int id, String tenSan, String diaChi, long giaSan, String hinhAnh, String khungGio) {
+    public SanBong(int id, String tenSan, String diaChi, long giaSan, String hinhAnh, List<KhungGio> danhSachKhungGio) {
         this.id = id;
         this.tenSan = tenSan;
         this.diaChi = diaChi;
         this.giaSan = giaSan;
         this.hinhAnh = hinhAnh;
-        this.khungGio = khungGio;
+        this.danhSachKhungGio = danhSachKhungGio;
     }
 
-
-    public String getKhungGio() { return khungGio; }
-    public void setKhungGio(String khungGio) { this.khungGio = khungGio; }
+    public List<KhungGio> getDanhSachKhungGio() { return danhSachKhungGio; }
+    public void setDanhSachKhungGio(List<KhungGio> danhSachKhungGio) { this.danhSachKhungGio = danhSachKhungGio; }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

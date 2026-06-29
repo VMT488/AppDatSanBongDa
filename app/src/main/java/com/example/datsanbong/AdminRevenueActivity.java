@@ -79,28 +79,22 @@ public class AdminRevenueActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        // Chỉ dùng DUY NHẤT một bộ lắng nghe sự kiện
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
+
             if (id == R.id.nav_quan_ly_san) {
                 Intent intent = new Intent(AdminRevenueActivity.this, AdminActivity.class);
                 startActivity(intent);
-            } else if (id == R.id.nav_thong_ke) {
-                drawerLayout.closeDrawer(GravityCompat.START);
-            }
-
-            drawerLayout.closeDrawer(GravityCompat.START);
-            return true;
-        });
-
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.nav_manage_customers) {
+            } else if (id == R.id.nav_manage_customers) {
                 Intent intent = new Intent(AdminRevenueActivity.this, AdminCustomerActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_thong_ke) {
+                // Đang ở chính màn hình thống kê rồi, chỉ cần đóng drawer
                 drawerLayout.closeDrawer(GravityCompat.START);
             }
 
+            // Luôn đóng Menu sau khi chọn xong hành động
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
