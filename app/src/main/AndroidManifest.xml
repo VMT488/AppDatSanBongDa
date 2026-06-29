@@ -35,7 +35,7 @@
         <activity android:name=".ProfileActivity" />
         <activity
             android:name=".AdminActivity"
-            android:exported="true" />
+            android:exported="false" />
     </application>
 
 </manifest>

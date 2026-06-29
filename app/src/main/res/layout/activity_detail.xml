@@ -60,26 +60,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Giờ bắt đầu"
+            android:text="Chọn ca đá (Khung giờ cố định)"
             android:textStyle="bold"
             android:layout_marginTop="16dp"/>
 
         <Spinner
-            android:id="@+id/spinnerStartTime"
+            android:id="@+id/spinnerKhungGio"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Giờ kết thúc"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <Spinner
-            android:id="@+id/spinnerEndTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:padding="10dp"/>
 
         <Button
             android:id="@+id/btnDatSan"
@@ -89,5 +78,4 @@
             android:layout_marginTop="20dp"/>
 
     </LinearLayout>
-
 </ScrollView>
