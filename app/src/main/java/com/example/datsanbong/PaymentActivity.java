@@ -1,5 +1,12 @@
 package com.example.datsanbong;
 
+import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,16 +17,23 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.datsanbong.models.Booking;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
+import com.example.datsanbong.receivers.NotificationReceiver;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class PaymentActivity extends AppCompatActivity {
 
@@ -31,7 +45,8 @@ public class PaymentActivity extends AppCompatActivity {
     private Button btnXacNhanThanhToan;
 
     private FirebaseFirestore db;
-    private String documentIdCuaSan, tenSan, ngayDat, gioBatDau, gioKetThuc;
+    private String documentIdCuaSan, tenSan, ngayDat;
+    private long gioBatDauLong, gioKetThucLong;
     private int sanBongId, viTriChon;
     private long giaSan;
     private String phuongThucThanhToan = "QR";
@@ -39,10 +54,20 @@ public class PaymentActivity extends AppCompatActivity {
     private final String ACCOUNT_NO = "0383990265";
     private final String ACCOUNT_NAME = "TRAN TRUNG TIEN";
     private DatabaseReference realtimeDb;
+    private final ActivityResultLauncher<String> requestNotificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    Toast.makeText(this, "Đã bật hệ thống nhắc nhở lịch đá bóng!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Bạn cần cấp quyền thông báo để app nhắc lịch hẹn giờ đá!", Toast.LENGTH_LONG).show();
+                }
+            });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
+
+        kiemTraVaXinQuyenThongBao();
 
         db = FirebaseFirestore.getInstance();
         realtimeDb = com.google.firebase.database.FirebaseDatabase.getInstance().getReference();
@@ -64,11 +89,15 @@ public class PaymentActivity extends AppCompatActivity {
             giaSan = extras.getLong("giaSan");
             ngayDat = extras.getString("ngayDat");
             viTriChon = extras.getInt("viTriChon");
-            gioBatDau = extras.getString("gioBatDau");
-            gioKetThuc = extras.getString("gioKetThuc");
+            gioBatDauLong = extras.getLong("gioBatDau");
+            gioKetThucLong = extras.getLong("gioKetThuc");
+
+            SimpleDateFormat sdfGio = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            String strGioBatDau = sdfGio.format(new Date(gioBatDauLong));
+            String strGioKetThuc = sdfGio.format(new Date(gioKetThucLong));
 
             txtPayTenSan.setText("Sân: " + tenSan);
-            txtPayNgayCa.setText("Thời gian: " + gioBatDau + " - " + gioKetThuc + " Đêm (" + ngayDat + ")");
+            txtPayNgayCa.setText("Thời gian: " + strGioBatDau + " - " + strGioKetThuc + " (" + ngayDat + ")");
             txtPayTongTien.setText("Tổng tiền: " + giaSan + " đ");
         }
 
@@ -86,10 +115,19 @@ public class PaymentActivity extends AppCompatActivity {
 
         btnXacNhanThanhToan.setOnClickListener(v -> tienHanhGhiNhanDatSan());
     }
-
+    private void kiemTraVaXinQuyenThongBao() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
     private void taoMaQRThanhToan() {
-        String noiDungChuyenKhoan = "Datsan " + tenSan.replaceAll("\\s+", "") + " " + gioBatDau.replace(":", "h");
+        SimpleDateFormat sdfGio = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        String strGioBatDau = sdfGio.format(new Date(gioBatDauLong));
 
+        String noiDungChuyenKhoan = "Datsan " + tenSan.replaceAll("\\s+", "") + " " + strGioBatDau.replace(":", "h");
         String urlVietQR = "https://img.vietqr.io/image/" + BANK_ID + "-" + ACCOUNT_NO + "-compact.png"
                 + "?amount=" + giaSan
                 + "&addInfo=" + noiDungChuyenKhoan
@@ -101,7 +139,6 @@ public class PaymentActivity extends AppCompatActivity {
                 .error(android.R.drawable.stat_notify_error)
                 .into(imgQR);
     }
-
     private void tienHanhGhiNhanDatSan() {
         btnXacNhanThanhToan.setEnabled(false);
 
@@ -130,6 +167,9 @@ public class PaymentActivity extends AppCompatActivity {
                 });
     }
     private void luuHoaDonBookingVaoRealtimeDB() {
+        SimpleDateFormat sdfGio = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        String strGioBatDau = sdfGio.format(new Date(gioBatDauLong));
+        String strGioKetThuc = sdfGio.format(new Date(gioKetThucLong));
         String bookingId = realtimeDb.child("Bookings").push().getKey();
 
         if (bookingId == null) {
@@ -147,8 +187,8 @@ public class PaymentActivity extends AppCompatActivity {
                 tenSan,
                 "Khách hàng Mobile (" + phuongThucThanhToan + ")",
                 ngayDat,
-                gioBatDau,
-                gioKetThuc,
+                strGioBatDau,
+                strGioKetThuc,
                 giaSan,
                 trangThaiDonHang,
                 System.currentTimeMillis()
@@ -157,6 +197,7 @@ public class PaymentActivity extends AppCompatActivity {
         //  đẩy object lên  Bookings
         realtimeDb.child("Bookings").child(bookingId).setValue(newBooking)
                 .addOnSuccessListener(unused -> {
+                    datLichNhacNho(gioBatDauLong, tenSan);
                     Toast.makeText(PaymentActivity.this, "Đặt sân và thanh toán thành công!", Toast.LENGTH_LONG).show();
                     finish();
                 })
@@ -164,5 +205,43 @@ public class PaymentActivity extends AppCompatActivity {
                     btnXacNhanThanhToan.setEnabled(true);
                     Toast.makeText(PaymentActivity.this, "Lỗi lưu Realtime DB: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+    private void datLichNhacNho(long gioBatDauMilisecond, String tenSanBong) {
+        long timeAlarmInMillis = gioBatDauMilisecond - (2 * 60 * 60 * 1000);
+
+        if (timeAlarmInMillis < System.currentTimeMillis()) {
+            return;
+        }
+
+        SimpleDateFormat sdfGio = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        String strGioBatDau = sdfGio.format(new Date(gioBatDauMilisecond));
+
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        intent.putExtra("tenSan", tenSanBong);
+        intent.putExtra("gioBatDau", strGioBatDau);
+
+        int requestCode = tenSanBong.hashCode();
+        int flags;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
+        } else {
+            flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                requestCode,
+                intent,
+                flags
+        );
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setWindow(AlarmManager.RTC_WAKEUP, timeAlarmInMillis, 1000, pendingIntent);
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeAlarmInMillis, pendingIntent);
+            }
+        }
     }
 }
