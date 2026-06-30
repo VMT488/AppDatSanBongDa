@@ -8,7 +8,6 @@ public class SanBong {
     private String diaChi;
     private long giaSan;
     private String hinhAnh;
-    // Thay đổi ở đây: Một sân bóng có nhiều khung giờ để lựa chọn
     private List<KhungGio> danhSachKhungGio;
 
     public SanBong() {}

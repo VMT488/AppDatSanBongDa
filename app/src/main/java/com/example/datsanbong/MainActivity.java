@@ -2,6 +2,8 @@ package com.example.datsanbong;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -31,16 +33,17 @@ public class MainActivity extends AppCompatActivity {
     private EditText edtSearch;
     private DatabaseReference db;
     private BottomNavigationView bottomNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        db = FirebaseDatabase.getInstance()
-                .getReference("SanBong");
+        db = FirebaseDatabase.getInstance().getReference("SanBong");
         rvSanBong = findViewById(R.id.rvSanBong);
         edtSearch = findViewById(R.id.edtSearch);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rvSanBong.setLayoutManager(linearLayoutManager);
 
@@ -49,6 +52,21 @@ public class MainActivity extends AppCompatActivity {
         rvSanBong.setAdapter(sanBongAdapter);
 
         listenFirebase();
+
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (sanBongAdapter != null) {
+                    sanBongAdapter.filter(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -60,67 +78,51 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_home) {
                 return true;
             } else if (id == R.id.nav_profile) {
-                Intent intent =
-                        new Intent(
-                                MainActivity.this,
-                                ProfileActivity.class
-                        );
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 startActivity(intent);
                 return true;
             }
             return false;
         });
         sanBongAdapter.setOnItemClickListener(sanBong -> {
-
-            Intent intent =
-                    new Intent(
-                            MainActivity.this,
-                            DetailActivity.class
-                    );
+            Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
             intent.putExtra("tenSan", sanBong.getTenSan());
             intent.putExtra("diaChi", sanBong.getDiaChi());
             intent.putExtra("giaSan", sanBong.getGiaSan());
             intent.putExtra("hinhAnh", sanBong.getHinhAnh());
+            intent.putExtra("documentId", String.valueOf(sanBong.getId()));
 
             startActivity(intent);
         });
     }
 
-    // Hàm lấy dữ liệu thời gian thực từ Cloud Firestore
     private void listenFirebase() {
-
         db.addValueEventListener(new ValueEventListener() {
-
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-
                 mListSanBong.clear();
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-
                     SanBong sanBong = dataSnapshot.getValue(SanBong.class);
-
                     if (sanBong != null) {
                         mListSanBong.add(sanBong);
                     }
-
                 }
-
-                sanBongAdapter.notifyDataSetChanged();
+                if (sanBongAdapter != null) {
+                    sanBongAdapter.setDanhSachGoc(new ArrayList<>(mListSanBong));
+                    sanBongAdapter.notifyDataSetChanged();
+                    String chuDangTimKiem = edtSearch.getText().toString();
+                    if (!chuDangTimKiem.isEmpty()) {
+                        sanBongAdapter.filter(chuDangTimKiem);
+                    }
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
-
-                Toast.makeText(
-                        MainActivity.this,
-                        error.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
-
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
-
 }
