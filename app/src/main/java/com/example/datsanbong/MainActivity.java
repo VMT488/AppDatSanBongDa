@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        db = FirebaseDatabase.getInstance().getReference("SanBong");
+        db = FirebaseDatabase.getInstance().getReference("DanhSachSanBong");
         rvSanBong = findViewById(R.id.rvSanBong);
         edtSearch = findViewById(R.id.edtSearch);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
