@@ -57,13 +57,39 @@
             android:textColor="#666666"
             android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/tvUserEmail"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Email: "
-            android:textColor="#666666"
-            android:textSize="14sp" />
+            android:layout_marginTop="2dp">
+
+            <TextView
+                android:id="@+id/tvUserEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@id/btnBlockUnblock"
+                android:layout_centerInParent="true"
+                android:text="Email: "
+                android:textColor="#666666"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnBlockUnblock"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="8dp"
+                android:backgroundTint="#D32F2F"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="0dp"
+                android:text="Khóa"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+
+                android:focusable="true"
+                android:clickable="true"
+                android:focusableInTouchMode="false"/>
+        </RelativeLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

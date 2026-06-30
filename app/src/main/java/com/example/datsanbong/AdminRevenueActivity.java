@@ -1,18 +1,7 @@
 package com.example.datsanbong;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.Insets;
-import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -20,22 +9,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.datsanbong.models.Booking;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,8 +39,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Locale;
 
 public class AdminRevenueActivity extends AppCompatActivity {
 
@@ -58,6 +51,10 @@ public class AdminRevenueActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
+
+    private final SimpleDateFormat sdfFirebase = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+    private final SimpleDateFormat sdfDisplay = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,55 +76,51 @@ public class AdminRevenueActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Chỉ dùng DUY NHẤT một bộ lắng nghe sự kiện
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-
             if (id == R.id.nav_quan_ly_san) {
-                Intent intent = new Intent(AdminRevenueActivity.this, AdminActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(AdminRevenueActivity.this, AdminActivity.class));
             } else if (id == R.id.nav_manage_customers) {
-                Intent intent = new Intent(AdminRevenueActivity.this, AdminCustomerActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(AdminRevenueActivity.this, AdminCustomerActivity.class));
             } else if (id == R.id.nav_thong_ke) {
-                // Đang ở chính màn hình thống kê rồi, chỉ cần đóng drawer
                 drawerLayout.closeDrawer(GravityCompat.START);
             }
-
-            // Luôn đóng Menu sau khi chọn xong hành động
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
+
+        // Kết nối thẳng đến nhánh nút gốc "Bookings" trên Realtime DB
         mDatabase = FirebaseDatabase.getInstance().getReference("Bookings");
 
         btnStartDate.setOnClickListener(v -> showDatePicker(true));
         btnEndDate.setOnClickListener(v -> showDatePicker(false));
-
-//        if(getSupportActionBar()!=null){
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//            getSupportActionBar().setTitle("Thống kê doanh thu");
-//        }
 
         loadRevenueData();
     }
 
     private void showDatePicker(boolean isStartDate) {
         Calendar calendar = Calendar.getInstance();
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, dayOfMonth, month, year) -> {
-            String selectedDate = String.format("%02d-%02d-%d", dayOfMonth, (month + 1), year);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    String selectedDate = dayOfMonth + "/" + (month + 1) + "/" + year;
 
-            if (isStartDate) {
-                startDate = selectedDate;
-                btnStartDate.setText("Từ: " + selectedDate);
-            } else {
-                endDate = selectedDate;
-                btnEndDate.setText("Đến: " + selectedDate);
-            }
+                    if (isStartDate) {
+                        startDate = selectedDate;
+                        btnStartDate.setText("Từ: " + selectedDate);
+                    } else {
+                        endDate = selectedDate;
+                        btnEndDate.setText("Đến: " + selectedDate);
+                    }
 
-            if (!startDate.isEmpty() && !endDate.isEmpty()) {
-                loadRevenueData();
-            }
-        },  calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH),calendar.get(Calendar.YEAR));
+                    if (!startDate.isEmpty() && !endDate.isEmpty()) {
+                        loadRevenueData();
+                    }
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
         datePickerDialog.show();
     }
 
@@ -135,11 +128,11 @@ public class AdminRevenueActivity extends AppCompatActivity {
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                double totalRevenue = 0;
+                long totalRevenue = 0;
                 int successCount = 0;
                 int cancelCount = 0;
 
-                HashMap<String, Double> dailyRevenueMap = new HashMap<>();
+                HashMap<String, Long> dailyRevenueMap = new HashMap<>();
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Object valueDate = dataSnapshot.child("ngayDat").getValue();
@@ -148,29 +141,29 @@ public class AdminRevenueActivity extends AppCompatActivity {
                     Object valueStatus = dataSnapshot.child("trangThai").getValue();
                     String status = (valueStatus != null) ? String.valueOf(valueStatus) : "";
 
-                    double tongTien = 0;
+                    long tongTien = 0;
                     Object valueTongTien = dataSnapshot.child("tongTien").getValue();
                     if (valueTongTien != null) {
                         if (valueTongTien instanceof Long) {
-                            tongTien = ((Long) valueTongTien).doubleValue();
+                            tongTien = (Long) valueTongTien;
                         } else if (valueTongTien instanceof Double) {
-                            tongTien = (Double) valueTongTien;
+                            tongTien = ((Double) valueTongTien).longValue();
                         } else if (valueTongTien instanceof String) {
                             try {
-                                tongTien = Double.parseDouble((String) valueTongTien);
+                                tongTien = Long.parseLong((String) valueTongTien);
                             } catch (NumberFormatException e) {
                                 tongTien = 0;
                             }
                         }
                     }
 
-                    // 4. Kiểm tra điều kiện và tính toán doanh thu
+                    // 3. Kiểm tra điều kiện ngày tháng và trạng thái đơn hàng
                     if (!date.isEmpty() && isDateInRange(date, startDate, endDate)) {
-                        if ("COMPLETED".equals(status)) {
+                        if ("CONFIRMED".equals(status) || "COMPLETED".equals(status)) {
                             totalRevenue += tongTien;
                             successCount++;
 
-                            double currentDayRevenue = dailyRevenueMap.getOrDefault(date, 0.0);
+                            long currentDayRevenue = dailyRevenueMap.getOrDefault(date, 0L);
                             dailyRevenueMap.put(date, currentDayRevenue + tongTien);
 
                         } else if ("CANCELLED".equals(status)) {
@@ -179,8 +172,7 @@ public class AdminRevenueActivity extends AppCompatActivity {
                     }
                 }
 
-                // Hiển thị kết quả lên giao diện
-                DecimalFormat formatter = new DecimalFormat("#.###");
+                DecimalFormat formatter = new DecimalFormat("#,###");
                 tvTotalRevenue.setText(formatter.format(totalRevenue) + " Đ");
                 tvSuccessfulBookings.setText(successCount + " đơn");
                 tvCanceledBookings.setText(cancelCount + " đơn");
@@ -196,19 +188,20 @@ public class AdminRevenueActivity extends AppCompatActivity {
     }
 
     private boolean isDateInRange(String bookingDate, String start, String end) {
+        // Nếu admin chưa chọn bộ lọc ngày, mặc định trả về true để hiển thị tất cả dữ liệu lịch sử
         if (start == null || start.isEmpty() || end == null || end.isEmpty()) {
             return true;
         }
         if (bookingDate == null || bookingDate.isEmpty()) {
             return false;
         }
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        try {
-            Date dateBooking = sdf.parse(bookingDate);
-            Date dateStart = sdf.parse(start);
-            Date dateEnd = sdf.parse(end);
 
-            // Kiểm tra xem ngày đặt có nằm trong khoảng từ ngày bắt đầu đến ngày kết thúc không
+        try {
+            Date dateBooking = sdfFirebase.parse(bookingDate);
+            Date dateStart = sdfFirebase.parse(start);
+            Date dateEnd = sdfFirebase.parse(end);
+
+            // Kiểm tra điều kiện lọt mốc thời gian bộ lọc
             return dateBooking != null && !dateBooking.before(dateStart) && !dateBooking.after(dateEnd);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -216,14 +209,21 @@ public class AdminRevenueActivity extends AppCompatActivity {
         }
     }
 
-    // đưa dữ liệu vào biểu đồ BarChart
-    private void setupBarChart(HashMap<String, Double> revenueMap) {
+    private void setupBarChart(HashMap<String, Long> revenueMap) {
         List<BarEntry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
         List<String> sortedDates = new ArrayList<>(revenueMap.keySet());
-        Collections.sort(sortedDates);
-        int index = 0;
 
+        // Sắp xếp ngày tháng tăng dần theo trục thời gian
+        Collections.sort(sortedDates, (o1, o2) -> {
+            try {
+                return sdfFirebase.parse(o1).compareTo(sdfFirebase.parse(o2));
+            } catch (ParseException e) {
+                return 0;
+            }
+        });
+
+        int index = 0;
         for (String date : sortedDates) {
             float revenue = revenueMap.get(date).floatValue();
             entries.add(new BarEntry(index, revenue));
@@ -243,7 +243,16 @@ public class AdminRevenueActivity extends AppCompatActivity {
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
-        xAxis.setLabelRotationAngle(-45);
+        xAxis.setLabelRotationAngle(0);
+        YAxis leftAxis = barChartRevenue.getAxisLeft();
+
+        leftAxis.setAxisMinimum(0f);
+        leftAxis.setGranularity(50000f);
+
+        YAxis rightAxis = barChartRevenue.getAxisRight();
+        rightAxis.setAxisMinimum(0f);
+
+        barChartRevenue.getAxisLeft().setSpaceTop(15f);
 
         barChartRevenue.animateY(1000);
         barChartRevenue.invalidate();

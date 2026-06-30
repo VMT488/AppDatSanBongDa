@@ -4,10 +4,13 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.example.datsanbong.AdminCustomerActivity;
 import com.example.datsanbong.R;
 import com.example.datsanbong.models.User;
 import java.util.List;
@@ -39,10 +42,30 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             if (user.isActive()) {
                 holder.tvStatus.setText("Hoạt động");
                 holder.tvStatus.setTextColor(Color.parseColor("#007A33"));
+
+                holder.btnBlockUnblock.setText("Khóa");
+                holder.btnBlockUnblock.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#D32F2F"))); // Màu đỏ
             } else {
                 holder.tvStatus.setText("Bị khóa");
                 holder.tvStatus.setTextColor(Color.RED);
+
+                holder.btnBlockUnblock.setText("Mở khóa");
+                holder.btnBlockUnblock.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#007A33"))); // Màu xanh
             }
+
+            holder.btnBlockUnblock.setOnClickListener(v -> {
+                android.content.Context context = v.getContext();
+
+                while (context instanceof android.content.ContextWrapper) {
+                    if (context instanceof AdminCustomerActivity) {
+                        ((AdminCustomerActivity) context).thayDoiTrangThaiBlockUser(user);
+                        return;
+                    }
+                    context = ((android.content.ContextWrapper) context).getBaseContext();
+                }
+
+                Toast.makeText(v.getContext(), "Không thể thực hiện tác vụ này!", Toast.LENGTH_SHORT).show();
+            });
         }
     }
 
@@ -53,6 +76,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvUsername, tvPhone, tvEmail, tvStatus;
+        Button btnBlockUnblock;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -61,6 +85,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             tvPhone = itemView.findViewById(R.id.tvUserPhone);
             tvEmail = itemView.findViewById(R.id.tvUserEmail);
             tvStatus = itemView.findViewById(R.id.tvUserStatus);
+            btnBlockUnblock = itemView.findViewById(R.id.btnBlockUnblock);
         }
     }
 }
