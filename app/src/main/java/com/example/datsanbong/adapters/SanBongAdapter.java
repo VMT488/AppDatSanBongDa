@@ -12,12 +12,14 @@ import com.example.datsanbong.R;
 import com.example.datsanbong.models.SanBong;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongViewHolder> {
 
-    private final List<SanBong> mListSanBong;
+    private List<SanBong> mListSanBong;
+    private List<SanBong> mListSanBongGoc = new ArrayList<>();
 
     private OnItemClickListener listener;
 
@@ -31,6 +33,28 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
 
     public SanBongAdapter(List<SanBong> mListSanBong) {
         this.mListSanBong = mListSanBong;
+    }
+
+    public void setDanhSachGoc(List<SanBong> list) {
+        this.mListSanBongGoc = new ArrayList<>(list);
+    }
+
+    public void filter(String query) {
+        List<SanBong> listFilter = new ArrayList<>();
+
+        if (query == null || query.isEmpty()) {
+            listFilter.addAll(mListSanBongGoc);
+        } else {
+            String textSearch = query.toLowerCase().trim();
+            for (SanBong san : mListSanBongGoc) {
+                if (san.getTenSan() != null && san.getTenSan().toLowerCase().contains(textSearch)) {
+                    listFilter.add(san);
+                }
+            }
+        }
+
+        this.mListSanBong = listFilter;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -53,11 +77,9 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
 
         holder.txtTenSan.setText(sanBong.getTenSan());
         holder.txtDiaChi.setText(sanBong.getDiaChi());
-        NumberFormat formatter =
-                NumberFormat.getInstance(new Locale("vi", "VN"));
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
-        holder.txtGiaSan.setText(
-                formatter.format(sanBong.getGiaSan()) + " VNĐ");
+        holder.txtGiaSan.setText(formatter.format(sanBong.getGiaSan()) + " VNĐ");
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
