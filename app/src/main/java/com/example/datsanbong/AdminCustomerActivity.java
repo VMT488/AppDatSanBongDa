@@ -1,15 +1,20 @@
 package com.example.datsanbong;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.datsanbong.adapters.UserAdapter;
 import com.example.datsanbong.models.User;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,18 +30,44 @@ public class AdminCustomerActivity extends AppCompatActivity {
     private UserAdapter userAdapter;
     private List<User> userList;
     private DatabaseReference mDatabase;
+    private DrawerLayout drawerLayout;
 
     @Override
-    protected void onCreate(Bundle Bundle) {
-        super.onCreate(Bundle);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_customer);
 
         Toolbar toolbar = findViewById(R.id.toolbarCustomer);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.navigationView);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(item -> {
+                int id = item.getItemId();
+
+                if (id == R.id.nav_quan_ly_san) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Intent intent = new Intent(AdminCustomerActivity.this, AdminActivity.class);
+                    startActivity(intent);
+                } else if (id == R.id.nav_thong_ke) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Intent intent = new Intent(AdminCustomerActivity.this, AdminRevenueActivity.class);
+                    startActivity(intent);
+                } else if (id == R.id.nav_manage_customers) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                }
+
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            });
         }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         rvCustomers = findViewById(R.id.rvCustomers);
         rvCustomers.setLayoutManager(new LinearLayoutManager(this));
@@ -49,7 +80,26 @@ public class AdminCustomerActivity extends AppCompatActivity {
 
         loadUserData();
     }
+    public void thayDoiTrangThaiBlockUser(User user) {
+        boolean trangThaiMoi = !user.isActive();
+        String hanhDong = trangThaiMoi ? "Mở khóa (Active)" : "Khóa (Block)";
 
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Xác nhận thay đổi")
+                .setMessage("Bạn có chắc chắn muốn " + hanhDong + " tài khoản: " + user.getName() + "?")
+                .setPositiveButton("Đồng ý", (dialog, which) -> {
+
+                    mDatabase.child(user.getUid()).child("active").setValue(trangThaiMoi)
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(AdminCustomerActivity.this, "Đã " + hanhDong + " thành công!", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(AdminCustomerActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
     private void loadUserData() {
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
@@ -63,7 +113,6 @@ public class AdminCustomerActivity extends AppCompatActivity {
                     }
 
                     Map<String, Object> userMap = (Map<String, Object>) rawData;
-
                     String uid = dataSnapshot.getKey();
 
                     String name = userMap.containsKey("name") ? String.valueOf(userMap.get("name")) : "";
@@ -91,8 +140,6 @@ public class AdminCustomerActivity extends AppCompatActivity {
                         userList.add(user);
                     }
                 }
-
-                // Cập nhật lên giao diện RecyclerView
                 userAdapter.notifyDataSetChanged();
             }
 

@@ -15,67 +15,62 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AdminActivity extends AppCompatActivity {
 
-    private FirebaseFirestore db;
+    private DatabaseReference mDatabase;
+    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
-        db = FirebaseFirestore.getInstance();
-        Button btnThemSan = findViewById(R.id.btnThemSan);
+        mDatabase = FirebaseDatabase.getInstance().getReference("DanhSachSanBong");
 
-        // 1. Cấu hình Toolbar phía trên làm ActionBar
+        Button btnThemSan = findViewById(R.id.btnThemSan);
         Toolbar toolbarAdmin = findViewById(R.id.toolbarAdmin);
         setSupportActionBar(toolbarAdmin);
 
-        // 2. Ánh xạ DrawerLayout điều khiển Menu trượt
-        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.navigationView);
 
-        // 3. Tạo nút Hamburger (3 gạch) và đồng bộ với trạng thái đóng/mở Menu
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbarAdmin, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // 4. Lắng nghe sự kiện click mở Dialog thêm sân bóng
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(item -> {
+                int id = item.getItemId();
+
+                if (id == R.id.nav_quan_ly_san) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else if (id == R.id.nav_thong_ke) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Intent intent = new Intent(AdminActivity.this, AdminRevenueActivity.class);
+                    startActivity(intent);
+                } else if (id == R.id.nav_manage_customers) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Intent intent = new Intent(AdminActivity.this, AdminCustomerActivity.class);
+                    startActivity(intent);
+                }
+
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            });
+        }
+
         if (btnThemSan != null) {
             btnThemSan.setOnClickListener(v -> showDialogThemSan());
         }
-
-        // 5. Cấu hình chuyển hướng cho các thành phần trong Custom Menu
-        View menuRevenue = findViewById(R.id.menuRevenue);
-        View menuSanBong = findViewById(R.id.menuSanBong);
-        View menuCustomer = findViewById(R.id.menuCustomer);
-
-        if (menuSanBong != null) {
-            menuSanBong.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
-        }
-
-        if (menuRevenue != null) {
-            menuRevenue.setOnClickListener(v -> {
-                drawerLayout.closeDrawer(GravityCompat.START);
-                Intent intent = new Intent(AdminActivity.this, AdminRevenueActivity.class);
-                startActivity(intent);
-            });
-        }
-
-        if (menuCustomer != null) {
-            menuCustomer.setOnClickListener(v -> {
-                drawerLayout.closeDrawer(GravityCompat.START);
-                Intent intent = new Intent(AdminActivity.this, AdminCustomerActivity.class);
-                startActivity(intent);
-            });
-        }
     }
 
-    // Hiển thị Dialog thêm sân bóng mới và tạo danh sách KhungGio rỗng ban đầu cho Firebase
     private void showDialogThemSan() {
         AlertDialog.Builder builder = new AlertDialog.Builder(AdminActivity.this);
         builder.setTitle("Thêm Sân Bóng Mới");
@@ -98,16 +93,16 @@ public class AdminActivity extends AppCompatActivity {
                 String anhSif = linkAnh.isEmpty() ? "https://vietnamisawesome.com/wp-content/uploads/2023/10/san-bong.jpg" : linkAnh;
                 long giaSan = Long.parseLong(gia);
 
-                // Khởi tạo danh sách KhungGio trống ban đầu để đẩy lên cấu trúc Firebase mới
                 List<KhungGio> danhSachGioTrong = new ArrayList<>();
-
-                // Đóng gói đối tượng SanBong mới chứa List<KhungGio>
                 SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, giaSan, anhSif, danhSachGioTrong);
 
-                db.collection("DanhSachSanBong")
-                        .add(sanBongMoi)
-                        .addOnSuccessListener(documentReference -> Toast.makeText(AdminActivity.this, "Đã thêm sân lên Firebase thành công!", Toast.LENGTH_SHORT).show())
-                        .addOnFailureListener(e -> Toast.makeText(AdminActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                String customKey = mDatabase.push().getKey();
+
+                if (customKey != null) {
+                    mDatabase.child(customKey).setValue(sanBongMoi)
+                            .addOnSuccessListener(unused -> Toast.makeText(AdminActivity.this, "Đã thêm sân lên Realtime DB thành công!", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(AdminActivity.this, "Lỗi Realtime: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
             } else {
                 Toast.makeText(AdminActivity.this, "Vui lòng điền đầy đủ thông tin bắt buộc!", Toast.LENGTH_SHORT).show();
             }

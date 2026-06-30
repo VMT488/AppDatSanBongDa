@@ -41,75 +41,10 @@
         </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="280dp"
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#F0F0F0"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MENU ADMIN"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="24dp"/>
-
-        <LinearLayout
-            android:id="@+id/menuRevenue"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="12dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📊 Thống kê doanh thu"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/menuSanBong"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="12dp"
-            android:background="#D0D0D0"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginTop="8dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⚽ Quản lý sân bóng"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/holo_green_dark"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/menuCustomer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="12dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginTop="8dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="👥 Quản lý khách hàng"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"/>
-        </LinearLayout>
-    </LinearLayout>
+        app:menu="@menu/drawer_menu" />
 </androidx.drawerlayout.widget.DrawerLayout>
