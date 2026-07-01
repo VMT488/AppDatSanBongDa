@@ -9,7 +9,6 @@
         android:id="@+id/nav_thong_ke"
         android:icon="@drawable/ic_balance"
         android:title="Thống kê doanh thu" />
-
     <item
         android:id="@+id/nav_quan_ly_san"
         android:icon="@drawable/ic_ball"
@@ -18,4 +17,8 @@
         android:id="@+id/nav_manage_customers"
         android:icon="@drawable/ic_account"
         android:title="Quản Lý Khách Hàng" />
+    <item
+        android:id="@+id/nav_booking"
+        android:icon="@drawable/ic_ball"
+        android:title="Quản lý đặt sân"/>
 </menu>

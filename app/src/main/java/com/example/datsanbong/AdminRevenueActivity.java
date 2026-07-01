@@ -102,8 +102,12 @@ public class AdminRevenueActivity extends AppCompatActivity {
                 startActivity(new Intent(AdminRevenueActivity.this, AdminCustomerActivity.class));
             } else if (id == R.id.nav_thong_ke) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-            }
-            drawerLayout.closeDrawer(GravityCompat.START);
+            }    else if(id == R.id.nav_booking){
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(AdminRevenueActivity.this, AdminBookingActivity.class);
+                startActivity(intent);
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
 

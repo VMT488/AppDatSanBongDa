@@ -27,6 +27,8 @@
         <activity
             android:name=".AdminRevenueActivity"
             android:exported="false" />
+        <activity android:name=".AdminBookingActivity"
+            android:exported="false"/>
         <activity
             android:name=".SplashActivity"
             android:exported="true">

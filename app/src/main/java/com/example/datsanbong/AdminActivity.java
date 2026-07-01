@@ -93,9 +93,13 @@ public class AdminActivity extends AppCompatActivity {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     Intent intent = new Intent(AdminActivity.this, AdminCustomerActivity.class);
                     startActivity(intent);
-                }
+                }  else if(id == R.id.nav_booking){
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Intent intent = new Intent(AdminActivity.this, AdminBookingActivity.class);
+                    startActivity(intent);
+            }
 
-                drawerLayout.closeDrawer(GravityCompat.START);
+            drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             });
         }
