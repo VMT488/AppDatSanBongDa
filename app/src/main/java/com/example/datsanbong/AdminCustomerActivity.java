@@ -79,7 +79,12 @@ public class AdminCustomerActivity extends AppCompatActivity {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     Intent intent = new Intent(AdminCustomerActivity.this, AdminRevenueActivity.class);
                     startActivity(intent);
-                } else if (id == R.id.nav_manage_customers) {
+                }  else if(id == R.id.nav_booking){
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Intent intent = new Intent(AdminCustomerActivity.this, AdminBookingActivity.class);
+                    startActivity(intent);
+                }
+                else if (id == R.id.nav_manage_customers) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                 }
 
