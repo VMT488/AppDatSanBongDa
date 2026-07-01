@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.datsanbong.adapters.UserAdapter;
 import com.example.datsanbong.models.User;
 import com.example.datsanbong.services.RoleManager;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,7 +32,6 @@ public class AdminCustomerActivity extends AppCompatActivity {
     private List<User> userList;
     private DatabaseReference mDatabase;
     private DrawerLayout drawerLayout;
-    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
