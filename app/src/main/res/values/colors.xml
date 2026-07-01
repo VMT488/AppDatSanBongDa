@@ -2,4 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="green_pitch_primary">#1E7E34</color>
+    <color name="green_pitch_dark">#115E25</color>
+    <color name="orange_accent">#FF9800</color>
+    <color name="price_green">#4CAF50</color>
+
+    <color name="bg_app">#F4F6F4</color>
+    <color name="text_main">#212121</color>
+    <color name="text_sub">#666666</color>
+    <color name="gray_cancel">#D32F2F</color>
 </resources>
