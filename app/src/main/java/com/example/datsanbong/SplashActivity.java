@@ -74,18 +74,11 @@ public class SplashActivity extends AppCompatActivity {
                         }
 
                         // Điều hướng theo role
-                        if ("ADMIN".equals(user.getRole())) {
+                        startActivity(new Intent(
+                                SplashActivity.this,
+                                MainActivity.class));
 
-                            startActivity(new Intent(
-                                    SplashActivity.this,
-                                    AdminActivity.class));
-
-                        } else {
-
-                            startActivity(new Intent(
-                                    SplashActivity.this,
-                                    MainActivity.class));
-                        }
+                        finish();
 
                         finish();
                     }
