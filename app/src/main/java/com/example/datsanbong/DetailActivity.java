@@ -14,9 +14,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide; // Thêm import thư viện Glide để load URL mạng
+import com.bumptech.glide.Glide;
 import com.example.datsanbong.models.Booking;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
@@ -36,7 +35,8 @@ import java.util.Locale;
 public class DetailActivity extends BaseActivity {
 
     private ImageView imgSan;
-    private TextView txtTenSan, txtDiaChi, txtGiaSan, txtNgayDat;
+    // BỔ SUNG: Khai báo thêm txtLoaiSan
+    private TextView txtTenSan, txtLoaiSan, txtDiaChi, txtGiaSan, txtNgayDat;
     private Button btnChonNgay, btnDatSan;
     private Spinner spinnerKhungGio;
 
@@ -59,9 +59,9 @@ public class DetailActivity extends BaseActivity {
                 .getReferenceFromUrl("https://datsanbong-b6ad1-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .child("Bookings");
 
-
         imgSan = findViewById(R.id.imgDetailSan);
         txtTenSan = findViewById(R.id.txtDetailTenSan);
+        txtLoaiSan = findViewById(R.id.txtDetailLoaiSan); // BỔ SUNG: Ánh xạ view loại sân
         txtDiaChi = findViewById(R.id.txtDetailDiaChi);
         txtGiaSan = findViewById(R.id.txtDetailGiaSan);
         txtNgayDat = findViewById(R.id.txtNgayDat);
@@ -74,6 +74,14 @@ public class DetailActivity extends BaseActivity {
         if (bundle != null) {
             txtTenSan.setText(bundle.getString("tenSan"));
             txtDiaChi.setText(bundle.getString("diaChi"));
+
+            // BỔ SUNG: Lấy dữ liệu loại sân từ Adapter truyền sang
+            String loaiSanStr = bundle.getString("loaiSan");
+            if (loaiSanStr != null && !loaiSanStr.isEmpty()) {
+                txtLoaiSan.setText("Loại sân: " + loaiSanStr);
+            } else {
+                txtLoaiSan.setText("Loại sân: Đang cập nhật");
+            }
 
             Object giaSanObj = bundle.get("giaSan");
             txtGiaSan.setText(giaSanObj != null ? giaSanObj.toString() + " đ/trận" : "");
@@ -127,15 +135,26 @@ public class DetailActivity extends BaseActivity {
 
                 if (snapshot.exists()) {
                     sanBongHienTai = snapshot.getValue(SanBong.class);
-                    if (sanBongHienTai != null && sanBongHienTai.getDanhSachKhungGio() != null) {
-                        listGioHienTai = sanBongHienTai.getDanhSachKhungGio();
+                    if (sanBongHienTai != null) {
+                        // Cập nhật lại UI từ Realtime Database để đảm bảo chính xác nhất
+                        if (sanBongHienTai.getLoaiSan() != null) {
+                            txtLoaiSan.setText("Loại sân: " + sanBongHienTai.getLoaiSan());
+                        }
+                        if (sanBongHienTai.getDanhSachKhungGio() != null) {
+                            listGioHienTai = sanBongHienTai.getDanhSachKhungGio();
+                        }
                     }
                 }
                 if (listGioHienTai.isEmpty()) {
                     listGioHienTai = taoDanhSachCaMacDinh();
                     if (sanBongHienTai == null) {
                         int idInt = (int) (System.currentTimeMillis() / 1000);
-                        sanBongHienTai = new SanBong(idInt, txtTenSan.getText().toString(), txtDiaChi.getText().toString(), 300000, "", listGioHienTai);
+
+                        // CẬP NHẬT: Thêm tham số loại sân vào Constructor dự phòng để tránh lỗi biên dịch
+                        String loaiSanDuyTri = getIntent().getStringExtra("loaiSan");
+                        if(loaiSanDuyTri == null) loaiSanDuyTri = "Chưa rõ";
+
+                        sanBongHienTai = new SanBong(idInt, txtTenSan.getText().toString(), txtDiaChi.getText().toString(), 300000, "", loaiSanDuyTri, listGioHienTai);
                         mDatabaseSanBong.child(documentIdCuaSan).setValue(sanBongHienTai);
                     } else {
                         sanBongHienTai.setDanhSachKhungGio(listGioHienTai);
@@ -249,6 +268,9 @@ public class DetailActivity extends BaseActivity {
         intent.putExtra("viTriChon", viTriChon);
         intent.putExtra("gioBatDau", khungGioChon.getGioBatDau());
         intent.putExtra("gioKetThuc", khungGioChon.getGioKetThuc());
+
+        // BỔ SUNG: Truyền tiếp loại sân sang màn hình PaymentActivity để hiển thị hóa đơn chuẩn xác
+        intent.putExtra("loaiSan", sanBongHienTai.getLoaiSan());
 
         startActivity(intent);
     }

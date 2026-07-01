@@ -38,6 +38,16 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/txtAdminLoaiSan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Loại sân: Sân 7 người"
+                android:textColor="@android:color/holo_orange_dark"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:layout_marginTop="2dp" />
+
+            <TextView
                 android:id="@+id/txtAdminDiaChi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,9 +58,11 @@
             <TextView
                 android:id="@+id/txtAdminKhungGio"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp" />
+
             <TextView
                 android:id="@+id/txtAdminGiaSan"
                 android:layout_width="match_parent"

@@ -10,15 +10,17 @@ public class SanBong {
     private String hinhAnh;
     private List<KhungGio> danhSachKhungGio;
     private String realtimeKey;
+    private String loaiSan;
 
     public SanBong() {}
 
-    public SanBong(int id, String tenSan, String diaChi, long giaSan, String hinhAnh, List<KhungGio> danhSachKhungGio) {
+    public SanBong(int id, String tenSan, String diaChi, long giaSan, String hinhAnh, String loaiSan, List<KhungGio> danhSachKhungGio) {
         this.id = id;
         this.tenSan = tenSan;
         this.diaChi = diaChi;
         this.giaSan = giaSan;
         this.hinhAnh = hinhAnh;
+        this.loaiSan = loaiSan;
         this.danhSachKhungGio = danhSachKhungGio;
     }
 
@@ -38,4 +40,12 @@ public class SanBong {
     public void setGiaSan(long giaSan) { this.giaSan = giaSan; }
     public String getHinhAnh() { return hinhAnh; }
     public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
+
+    public String getLoaiSan() {
+        return loaiSan;
+    }
+
+    public void setLoaiSan(String loaiSan) {
+        this.loaiSan = loaiSan;
+    }
 }

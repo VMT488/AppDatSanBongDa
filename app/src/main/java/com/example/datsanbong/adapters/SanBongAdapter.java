@@ -20,8 +20,8 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
 
     private List<SanBong> mListSanBong;
     private List<SanBong> mListSanBongGoc = new ArrayList<>();
-
     private OnItemClickListener listener;
+    private String loaiSanHienTai = "Tất cả";
 
     public interface OnItemClickListener {
         void onItemClick(SanBong sanBong);
@@ -39,33 +39,50 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
         this.mListSanBongGoc = new ArrayList<>(list);
     }
 
-    public void filter(String query) {
-        List<SanBong> listFilter = new ArrayList<>();
+    public void filter(String query, String loaiSan) {
+        if (loaiSan != null) {
+            this.loaiSanHienTai = loaiSan;
+        }
 
-        if (query == null || query.isEmpty()) {
-            listFilter.addAll(mListSanBongGoc);
-        } else {
-            String textSearch = query.toLowerCase().trim();
-            for (SanBong san : mListSanBongGoc) {
-                if (san.getTenSan() != null && san.getTenSan().toLowerCase().contains(textSearch)) {
-                    listFilter.add(san);
-                }
+        List<SanBong> listFilter = new ArrayList<>();
+        String textSearch = (query != null) ? query.toLowerCase().trim() : "";
+
+        for (SanBong san : mListSanBongGoc) {
+            boolean matchesSearch = true;
+            if (!textSearch.isEmpty()) {
+                matchesSearch = (san.getTenSan() != null && san.getTenSan().toLowerCase().contains(textSearch));
+            }
+
+            boolean matchesLoaiSan = true;
+            if (!loaiSanHienTai.equals("Tất cả")) {
+                matchesLoaiSan = (san.getLoaiSan() != null && san.getLoaiSan().toLowerCase().contains(loaiSanHienTai.toLowerCase()));
+            }
+
+            if (matchesSearch && matchesLoaiSan) {
+                listFilter.add(san);
             }
         }
 
         this.mListSanBong = listFilter;
         notifyDataSetChanged();
     }
+
+    public void filter(String query) {
+        filter(query, this.loaiSanHienTai);
+    }
+
     @NonNull
     @Override
     public SanBongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_san_bong, parent, false);
         return new SanBongViewHolder(view);
     }
+
     @Override
     public void onBindViewHolder(@NonNull SanBongViewHolder holder, int position) {
         SanBong sanBong = mListSanBong.get(position);
         if (sanBong == null) return;
+
         String imageStr = sanBong.getHinhAnh();
         if (imageStr != null && (imageStr.startsWith("http://") || imageStr.startsWith("https://"))) {
             Glide.with(holder.itemView.getContext())
@@ -85,10 +102,18 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
         } else {
             holder.imgSanBong.setImageResource(R.mipmap.ic_launcher);
         }
+
         holder.txtTenSan.setText(sanBong.getTenSan());
         holder.txtDiaChi.setText(sanBong.getDiaChi());
-        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
+        if (sanBong.getLoaiSan() != null && !sanBong.getLoaiSan().isEmpty()) {
+            holder.txtLoaiSan.setText("Loại sân: " + sanBong.getLoaiSan());
+            holder.txtLoaiSan.setVisibility(View.VISIBLE);
+        } else {
+            holder.txtLoaiSan.setVisibility(View.GONE);
+        }
+
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
         holder.txtGiaSan.setText(formatter.format(sanBong.getGiaSan()) + " VNĐ");
 
         holder.itemView.setOnClickListener(v -> {
@@ -108,6 +133,7 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
         private final TextView txtTenSan;
         private final TextView txtDiaChi;
         private final TextView txtGiaSan;
+        private final TextView txtLoaiSan;
 
         public SanBongViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -115,6 +141,12 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
             txtTenSan = itemView.findViewById(R.id.txtTenSan);
             txtDiaChi = itemView.findViewById(R.id.txtDiaChi);
             txtGiaSan = itemView.findViewById(R.id.txtGiaSan);
+
+            TextView tempLoaiSan = itemView.findViewById(R.id.txtLoaiSan);
+            if (tempLoaiSan == null) {
+                tempLoaiSan = itemView.findViewById(R.id.txtAdminLoaiSan);
+            }
+            txtLoaiSan = tempLoaiSan;
         }
     }
 }

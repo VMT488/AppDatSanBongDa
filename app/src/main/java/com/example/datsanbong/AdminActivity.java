@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.datsanbong.adapters.SanBongAdapter;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
-import com.example.datsanbong.services.RoleManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -137,6 +136,7 @@ public class AdminActivity extends AppCompatActivity {
 
         View view = LayoutInflater.from(AdminActivity.this).inflate(R.layout.dialog_them_san, null);
         final EditText edtTen = view.findViewById(R.id.edtTenSan);
+        final EditText edtLoaiSan = view.findViewById(R.id.edtLoaiSan); // Bổ sung ánh xạ loại sân
         final EditText edtDiaChi = view.findViewById(R.id.edtDiaChi);
         final EditText edtGia = view.findViewById(R.id.edtGiaSan);
         final EditText edtLinkAnh = view.findViewById(R.id.edtLinkAnh);
@@ -144,13 +144,15 @@ public class AdminActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton("Thêm", (dialog, which) -> {
             String ten = edtTen.getText().toString().trim();
+            String loaiSan = edtLoaiSan.getText().toString().trim(); // Lấy dữ liệu loại sân
             String diaChi = edtDiaChi.getText().toString().trim();
             String gia = edtGia.getText().toString().trim();
             String linkAnh = edtLinkAnh.getText().toString().trim();
 
             Toast.makeText(AdminActivity.this, "Đang xử lý thông tin sân...", Toast.LENGTH_SHORT).show();
 
-            if (!ten.isEmpty() && !diaChi.isEmpty() && !gia.isEmpty()) {
+            // Bổ sung điều kiện kiểm tra không được để trống loại sân
+            if (!ten.isEmpty() && !loaiSan.isEmpty() && !diaChi.isEmpty() && !gia.isEmpty()) {
                 try {
                     int idNgauNhien = (int) (System.currentTimeMillis() / 1000);
                     String anhSif;
@@ -169,7 +171,8 @@ public class AdminActivity extends AppCompatActivity {
                     long giaSan = Long.parseLong(giaSach);
 
                     List<KhungGio> danhSachGioTrong = taoDanhSachCaMacDinhForAdmin();
-                    SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, giaSan, anhSif, danhSachGioTrong);
+
+                    SanBong sanBongMoi = new SanBong(idNgauNhien, ten, diaChi, giaSan, anhSif, loaiSan, danhSachGioTrong);
 
                     String customKey = mDatabase.push().getKey();
 
@@ -184,7 +187,7 @@ public class AdminActivity extends AppCompatActivity {
                     Toast.makeText(AdminActivity.this, "Lỗi định dạng: Giá sân phải nhập số nguyên thuần túy!", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(AdminActivity.this, "Thất bại: Bạn để trống Tên, Địa chỉ hoặc Giá tiền!", Toast.LENGTH_LONG).show();
+                Toast.makeText(AdminActivity.this, "Thất bại: Bạn để trống Tên, Loại sân, Địa chỉ hoặc Giá tiền!", Toast.LENGTH_LONG).show();
             }
         });
         builder.setNegativeButton("Hủy", null);
