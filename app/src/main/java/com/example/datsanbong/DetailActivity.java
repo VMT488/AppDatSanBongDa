@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends BaseActivity {
 
     private ImageView imgSan;
     private TextView txtTenSan, txtDiaChi, txtGiaSan, txtNgayDat;
@@ -59,8 +59,6 @@ public class DetailActivity extends AppCompatActivity {
                 .getReferenceFromUrl("https://datsanbong-b6ad1-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .child("Bookings");
 
-        Button btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
 
         imgSan = findViewById(R.id.imgDetailSan);
         txtTenSan = findViewById(R.id.txtDetailTenSan);

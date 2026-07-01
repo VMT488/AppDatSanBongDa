@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.datsanbong.adapters.SanBongAdapter;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
+import com.example.datsanbong.services.RoleManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -80,8 +81,10 @@ public class AdminActivity extends AppCompatActivity {
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int id = item.getItemId();
-
-                if (id == R.id.nav_quan_ly_san) {
+                if (id == R.id.nav_home) {
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                } else if (id == R.id.nav_quan_ly_san) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                 } else if (id == R.id.nav_thong_ke) {
                     drawerLayout.closeDrawer(GravityCompat.START);

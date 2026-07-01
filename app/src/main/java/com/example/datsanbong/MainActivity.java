@@ -7,13 +7,13 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.datsanbong.adapters.SanBongAdapter;
 import com.example.datsanbong.models.SanBong;
+import com.example.datsanbong.services.RoleManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private List<SanBong> mListSanBong;
     private EditText edtSearch;
     private DatabaseReference db;
+    private boolean isAdmin = false;
     private BottomNavigationView bottomNavigationView;
 
     @Override
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         rvSanBong = findViewById(R.id.rvSanBong);
         edtSearch = findViewById(R.id.edtSearch);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
-
+        checkingRole();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rvSanBong.setLayoutManager(linearLayoutManager);
 
@@ -69,20 +70,35 @@ public class MainActivity extends AppCompatActivity {
         });
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
+
             int id = item.getItemId();
 
             if (id == R.id.nav_admin) {
                 Intent intent = new Intent(MainActivity.this, AdminActivity.class);
                 startActivity(intent);
                 return true;
-            } else if (id == R.id.nav_home) {
-                return true;
-            } else if (id == R.id.nav_profile) {
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                startActivity(intent);
+            }
+
+            if(id == R.id.nav_profile){
+
+                startActivity(new Intent(
+                        MainActivity.this,
+                        ProfileActivity.class));
+
                 return true;
             }
+
+            if(id == R.id.nav_admin){
+
+                startActivity(new Intent(
+                        MainActivity.this,
+                        AdminActivity.class));
+
+                return true;
+            }
+
             return false;
+
         });
 
         sanBongAdapter.setOnItemClickListener(sanBong -> {
@@ -134,5 +150,23 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private void checkingRole() {
+
+        RoleManager roleManager = new RoleManager();
+
+        roleManager.checkAdmin(admin -> {
+
+            runOnUiThread(() -> {
+
+                Menu menu = bottomNavigationView.getMenu();
+
+                menu.findItem(R.id.nav_admin)
+                        .setVisible(admin);
+
+            });
+
+        });
+
     }
 }
