@@ -19,6 +19,6 @@
         android:title="Quản Lý Khách Hàng" />
     <item
         android:id="@+id/nav_booking"
-        android:icon="@drawable/ic_ball"
+        android:icon="@drawable/ic_history"
         android:title="Quản lý đặt sân"/>
 </menu>

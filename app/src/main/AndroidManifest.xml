@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DatSanBong">
         <activity
+            android:name=".BookingHistoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditProfileActivity"
             android:exported="false" />
         <activity
@@ -27,8 +30,9 @@
         <activity
             android:name=".AdminRevenueActivity"
             android:exported="false" />
-        <activity android:name=".AdminBookingActivity"
-            android:exported="false"/>
+        <activity
+            android:name=".AdminBookingActivity"
+            android:exported="false" />
         <activity
             android:name=".SplashActivity"
             android:exported="true">

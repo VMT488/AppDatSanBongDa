@@ -92,6 +92,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 startActivity(intent);
                 return true;
+            }else if (id == R.id.nav_booking) {
+                Intent intent = new Intent(MainActivity.this, BookingHistoryActivity.class);
+                startActivity(intent);
+                return true;
             }
             return false;
         });
