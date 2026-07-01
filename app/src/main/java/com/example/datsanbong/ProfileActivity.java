@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -74,7 +75,16 @@ public class ProfileActivity extends BaseActivity {
 
         btnEdit.setOnClickListener(v -> {
 
-            // Làm sau
+            if (txtName.getText().toString().isEmpty()) {
+                Toast.makeText(ProfileActivity.this, "Vui lòng đợi dữ liệu tải xong!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
+            intent.putExtra("oldName", txtName.getText().toString());
+            intent.putExtra("oldUsername", txtUsername.getText().toString());
+            intent.putExtra("oldPhone", txtPhone.getText().toString());
+            startActivity(intent);
         });
 
     }
