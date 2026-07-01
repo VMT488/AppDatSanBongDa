@@ -9,6 +9,7 @@ public class SanBong {
     private long giaSan;
     private String hinhAnh;
     private List<KhungGio> danhSachKhungGio;
+    private String realtimeKey;
 
     public SanBong() {}
 
@@ -20,6 +21,9 @@ public class SanBong {
         this.hinhAnh = hinhAnh;
         this.danhSachKhungGio = danhSachKhungGio;
     }
+
+    public String getRealtimeKey() { return realtimeKey; }
+    public void setRealtimeKey(String realtimeKey) { this.realtimeKey = realtimeKey; }
 
     public List<KhungGio> getDanhSachKhungGio() { return danhSachKhungGio; }
     public void setDanhSachKhungGio(List<KhungGio> danhSachKhungGio) { this.danhSachKhungGio = danhSachKhungGio; }

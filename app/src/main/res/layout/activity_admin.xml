@@ -4,42 +4,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"> <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarAdmin"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="?attr/actionBarSize"
+        android:background="#007A33" app:title="Quản Lý Sân Bóng"
+        app:titleTextColor="#FFFFFF" /> <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5" android:padding="16dp">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbarAdmin"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/holo_green_dark"
-            app:title="Quản Lý Sân Bóng"
-            app:titleTextColor="@android:color/white" />
+    <Button
+        android:id="@+id/btnThemSan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="+ Thêm Sân Bóng Mới"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#007A33" android:layout_marginBottom="16dp"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <Button
-                android:id="@+id/btnThemSan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="+ Thêm Sân Bóng Mới"
-                android:backgroundTint="@android:color/holo_green_dark"
-                android:layout_marginBottom="16dp"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvAdminSanBong"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-        </LinearLayout>
-    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAdminSanBong"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+</LinearLayout>
+</LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"

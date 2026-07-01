@@ -56,25 +56,35 @@ public class SanBongAdapter extends RecyclerView.Adapter<SanBongAdapter.SanBongV
         this.mListSanBong = listFilter;
         notifyDataSetChanged();
     }
-
     @NonNull
     @Override
     public SanBongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_san_bong, parent, false);
         return new SanBongViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull SanBongViewHolder holder, int position) {
         SanBong sanBong = mListSanBong.get(position);
         if (sanBong == null) return;
+        String imageStr = sanBong.getHinhAnh();
+        if (imageStr != null && (imageStr.startsWith("http://") || imageStr.startsWith("https://"))) {
+            Glide.with(holder.itemView.getContext())
+                    .load(imageStr)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .into(holder.imgSanBong);
+        } else if (imageStr != null && !imageStr.isEmpty()) {
+            int resId = holder.itemView.getContext().getResources().getIdentifier(
+                    imageStr, "drawable", holder.itemView.getContext().getPackageName());
 
-        Glide.with(holder.itemView.getContext())
-                .load(sanBong.getHinhAnh())
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .into(holder.imgSanBong);
-
+            if (resId != 0) {
+                holder.imgSanBong.setImageResource(resId);
+            } else {
+                holder.imgSanBong.setImageResource(R.mipmap.ic_launcher);
+            }
+        } else {
+            holder.imgSanBong.setImageResource(R.mipmap.ic_launcher);
+        }
         holder.txtTenSan.setText(sanBong.getTenSan());
         holder.txtDiaChi.setText(sanBong.getDiaChi());
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
