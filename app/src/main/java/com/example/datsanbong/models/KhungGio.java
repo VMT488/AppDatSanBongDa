@@ -10,7 +10,6 @@ public class KhungGio {
     private long gioKetThuc;
     private boolean daDat;
 
-    // Constructor trống bắt buộc cho Firebase
     public KhungGio() {}
 
     public KhungGio(String idKhungGio, long gioBatDau, long gioKetThuc, boolean daDat) {
@@ -32,7 +31,6 @@ public class KhungGio {
     public boolean isDaDat() { return daDat; }
     public void setDaDat(boolean daDat) { this.daDat = daDat; }
 
-    // Ghi đè hàm này để ComboBox (Spinner) tự động chuyển số long thành định dạng giờ hiển thị cho User xem
     @Override
     public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());

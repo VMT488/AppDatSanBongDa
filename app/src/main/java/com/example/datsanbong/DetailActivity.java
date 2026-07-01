@@ -19,6 +19,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.datsanbong.models.Booking;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -36,6 +41,9 @@ public class DetailActivity extends AppCompatActivity {
     private Spinner spinnerKhungGio;
 
     private FirebaseFirestore db;
+    private DatabaseReference realtimeDb;
+    private ValueEventListener bookingListener;
+
     private SanBong sanBongHienTai;
     private String documentIdCuaSan;
 
@@ -45,6 +53,7 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         db = FirebaseFirestore.getInstance();
+        realtimeDb = FirebaseDatabase.getInstance().getReference().child("Bookings");
 
         Button btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
@@ -68,61 +77,95 @@ public class DetailActivity extends AppCompatActivity {
             txtGiaSan.setText(giaSanObj != null ? giaSanObj.toString() + " đ/trận" : "");
 
             imgSan.setImageResource(bundle.getInt("hinhAnh"));
-
             documentIdCuaSan = bundle.getString("documentId");
         }
 
         if (documentIdCuaSan == null && txtTenSan.getText() != null) {
             documentIdCuaSan = txtTenSan.getText().toString().trim();
         }
-
-        taiKhungGioRealtimeFromServer();
+        Calendar c = Calendar.getInstance();
+        String ngayHomNay = String.format(Locale.getDefault(), "%02d/%02d/%d",
+                c.get(Calendar.DAY_OF_MONTH), (c.get(Calendar.MONTH) + 1), c.get(Calendar.YEAR));
+        txtNgayDat.setText(ngayHomNay);
+        langNgheBookingRealtimeTheoNgay(ngayHomNay);
 
         btnChonNgay.setOnClickListener(v -> showDatePicker());
         btnDatSan.setOnClickListener(v -> xuLyDatSanFirebase());
     }
-
-    private void taiKhungGioRealtimeFromServer() {
+    private void langNgheBookingRealtimeTheoNgay(String ngayDuocChon) {
         if (documentIdCuaSan == null || documentIdCuaSan.isEmpty()) {
             Toast.makeText(this, "Lỗi: Không tìm thấy ID mã sân!", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (bookingListener != null) {
+            realtimeDb.removeEventListener(bookingListener);
+        }
+        db.collection("DanhSachSanBong").document(documentIdCuaSan).get().addOnSuccessListener(documentSnapshot -> {
+            List<KhungGio> listGioHienTai = new ArrayList<>();
 
-        db.collection("DanhSachSanBong").document(documentIdCuaSan)
-                .addSnapshotListener((documentSnapshot, error) -> {
-                    if (error != null) return;
+            if (documentSnapshot.exists()) {
+                sanBongHienTai = documentSnapshot.toObject(SanBong.class);
+                if (sanBongHienTai != null && sanBongHienTai.getDanhSachKhungGio() != null) {
+                    listGioHienTai = sanBongHienTai.getDanhSachKhungGio();
+                }
+            }
 
-                    List<KhungGio> listGio = new ArrayList<>();
+            if (listGioHienTai.isEmpty()) {
+                listGioHienTai = taoDanhSachCaMacDinh();
+                if (sanBongHienTai == null) {
+                    int idInt = (int) (System.currentTimeMillis() / 1000);
+                    sanBongHienTai = new SanBong(idInt, txtTenSan.getText().toString(), txtDiaChi.getText().toString(), 300000, "", listGioHienTai);
+                    db.collection("DanhSachSanBong").document(documentIdCuaSan).set(sanBongHienTai);
+                } else {
+                    sanBongHienTai.setDanhSachKhungGio(listGioHienTai);
+                    db.collection("DanhSachSanBong").document(documentIdCuaSan).update("danhSachKhungGio", listGioHienTai);
+                }
+            }
 
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        sanBongHienTai = documentSnapshot.toObject(SanBong.class);
-                        if (sanBongHienTai != null && sanBongHienTai.getDanhSachKhungGio() != null) {
-                            listGio = sanBongHienTai.getDanhSachKhungGio();
+            final List<KhungGio> danhSachGoc = listGioHienTai;
+            int sanId = sanBongHienTai != null ? sanBongHienTai.getId() : 0;
+            bookingListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (KhungGio kg : danhSachGoc) {
+                        kg.setDaDat(false);
+                    }
+                    for (DataSnapshot data : snapshot.getChildren()) {
+                        Booking booking = data.getValue(Booking.class);
+                        if (booking != null) {
+                            if (booking.getSanBongId() == sanId && ngayDuocChon.equals(booking.getNgayDat())) {
+                                if ("CANCELLED".equals(booking.getTrangThai())) {
+                                    continue;
+                                }
+                                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                for (KhungGio kg : danhSachGoc) {
+                                    String gioBatDauSankh = sdf.format(new Date(kg.getGioBatDau()));
+                                    String gioKetThucSankh = sdf.format(new Date(kg.getGioKetThuc()));
+
+                                    if (gioBatDauSankh.equals(booking.getGioBatDau()) && gioKetThucSankh.equals(booking.getGioKetThuc())) {
+                                        kg.setDaDat(true);
+                                    }
+                                }
+                            }
                         }
                     }
-
-                    if (listGio.isEmpty()) {
-                        listGio = taoDanhSachCaMacDinh();
-                        if (sanBongHienTai == null) {
-                            int idInt = (int) (System.currentTimeMillis() / 1000);
-                            sanBongHienTai = new SanBong(idInt, txtTenSan.getText().toString(), txtDiaChi.getText().toString(), 300000, "", listGio);
-                            db.collection("DanhSachSanBong").document(documentIdCuaSan).set(sanBongHienTai);
-                        } else {
-                            sanBongHienTai.setDanhSachKhungGio(listGio);
-                            db.collection("DanhSachSanBong").document(documentIdCuaSan).update("danhSachKhungGio", listGio);
-                        }
-                    }
-
                     CustomKhungGioAdapter adapter = new CustomKhungGioAdapter(
                             DetailActivity.this,
                             android.R.layout.simple_spinner_dropdown_item,
-                            listGio
+                            danhSachGoc
                     );
                     spinnerKhungGio.setAdapter(adapter);
-                });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(DetailActivity.this, "Lỗi đồng bộ dữ liệu Realtime!", Toast.LENGTH_SHORT).show();
+                }
+            };
+            realtimeDb.addValueEventListener(bookingListener);
+        });
     }
 
-    // Tạo sẵn 4 ca đá cố định dạng long bằng cách lấy mốc thời gian ngày hôm nay
     private List<KhungGio> taoDanhSachCaMacDinh() {
         List<KhungGio> list = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
@@ -140,7 +183,7 @@ public class DetailActivity extends AppCompatActivity {
 
         cal.set(Calendar.HOUR_OF_DAY, 19); cal.set(Calendar.MINUTE, 0); long c3Start = cal.getTimeInMillis();
         cal.set(Calendar.HOUR_OF_DAY, 20); cal.set(Calendar.MINUTE, 30); long c3End = cal.getTimeInMillis();
-        list.add(new KhungGio("ca_3", c3Start, c3End, true));
+        list.add(new KhungGio("ca_3", c3Start, c3End, false));
 
         cal.set(Calendar.HOUR_OF_DAY, 20); cal.set(Calendar.MINUTE, 30); long c4Start = cal.getTimeInMillis();
         cal.set(Calendar.HOUR_OF_DAY, 22); cal.set(Calendar.MINUTE, 0); long c4End = cal.getTimeInMillis();
@@ -176,10 +219,8 @@ public class DetailActivity extends AppCompatActivity {
         intent.putExtra("giaSan", sanBongHienTai.getGiaSan());
         intent.putExtra("ngayDat", ngayDat);
         intent.putExtra("viTriChon", viTriChon);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        intent.putExtra("gioBatDau", sdf.format(new Date(khungGioChon.getGioBatDau())));
-        intent.putExtra("gioKetThuc", sdf.format(new Date(khungGioChon.getGioKetThuc())));
+        intent.putExtra("gioBatDau", khungGioChon.getGioBatDau());
+        intent.putExtra("gioKetThuc", khungGioChon.getGioKetThuc());
 
         startActivity(intent);
     }
@@ -189,12 +230,21 @@ public class DetailActivity extends AppCompatActivity {
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String date = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                    String date = String.format(Locale.getDefault(), "%02d/%02d/%d", selectedDay, (selectedMonth + 1), selectedYear);
                     txtNgayDat.setText(date);
+                    langNgheBookingRealtimeTheoNgay(date);
                 },
                 calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)
         );
         datePickerDialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (bookingListener != null) {
+            realtimeDb.removeEventListener(bookingListener);
+        }
     }
 
     private class CustomKhungGioAdapter extends ArrayAdapter<KhungGio> {
@@ -212,7 +262,6 @@ public class DetailActivity extends AppCompatActivity {
 
             if (kg != null) {
                 tv.setText(kg.toString());
-
                 if (kg.isDaDat()) {
                     tv.setTextColor(Color.DKGRAY);
                     tv.setBackgroundColor(Color.parseColor("#DCDCDC"));
