@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -27,10 +28,14 @@ import com.example.datsanbong.models.Booking;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
 import com.example.datsanbong.receivers.NotificationReceiver;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -44,7 +49,6 @@ public class PaymentActivity extends AppCompatActivity {
     private ImageView imgQR;
     private Button btnXacNhanThanhToan;
 
-    private FirebaseFirestore db;
     private String documentIdCuaSan, tenSan, ngayDat;
     private long gioBatDauLong, gioKetThucLong;
     private int sanBongId, viTriChon;
@@ -53,7 +57,10 @@ public class PaymentActivity extends AppCompatActivity {
     private final String BANK_ID = "MB";
     private final String ACCOUNT_NO = "0383990265";
     private final String ACCOUNT_NAME = "TRAN TRUNG TIEN";
-    private DatabaseReference realtimeDb;
+
+    private DatabaseReference mDatabaseSanBong;
+    private DatabaseReference mDatabaseBookings;
+
     private final ActivityResultLauncher<String> requestNotificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
@@ -62,15 +69,17 @@ public class PaymentActivity extends AppCompatActivity {
                     Toast.makeText(this, "Bạn cần cấp quyền thông báo để app nhắc lịch hẹn giờ đá!", Toast.LENGTH_LONG).show();
                 }
             });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
         kiemTraVaXinQuyenThongBao();
+        String dbUrl = "https://datsanbong-b6ad1-default-rtdb.asia-southeast1.firebasedatabase.app/";
+        mDatabaseSanBong = FirebaseDatabase.getInstance(dbUrl).getReference("DanhSachSanBong");
+        mDatabaseBookings = FirebaseDatabase.getInstance(dbUrl).getReference("Bookings");
 
-        db = FirebaseFirestore.getInstance();
-        realtimeDb = com.google.firebase.database.FirebaseDatabase.getInstance().getReference();
         txtPayTenSan = findViewById(R.id.txtPayTenSan);
         txtPayNgayCa = findViewById(R.id.txtPayNgayCa);
         txtPayTongTien = findViewById(R.id.txtPayTongTien);
@@ -115,6 +124,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         btnXacNhanThanhToan.setOnClickListener(v -> tienHanhGhiNhanDatSan());
     }
+
     private void kiemTraVaXinQuyenThongBao() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -123,6 +133,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
         }
     }
+
     private void taoMaQRThanhToan() {
         SimpleDateFormat sdfGio = new SimpleDateFormat("HH:mm", Locale.getDefault());
         String strGioBatDau = sdfGio.format(new Date(gioBatDauLong));
@@ -140,37 +151,57 @@ public class PaymentActivity extends AppCompatActivity {
                 .into(imgQR);
     }
     private void tienHanhGhiNhanDatSan() {
+        if (documentIdCuaSan == null || documentIdCuaSan.isEmpty()) {
+            Toast.makeText(this, "Lỗi: Không tìm thấy ID Sân bóng!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         btnXacNhanThanhToan.setEnabled(false);
 
-        db.collection("DanhSachSanBong").document(documentIdCuaSan)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        SanBong sanBongHienTai = documentSnapshot.toObject(SanBong.class);
-                        if (sanBongHienTai != null && sanBongHienTai.getDanhSachKhungGio() != null) {
+        mDatabaseSanBong.child(documentIdCuaSan).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    SanBong sanBongHienTai = snapshot.getValue(SanBong.class);
+                    if (sanBongHienTai != null && sanBongHienTai.getDanhSachKhungGio() != null) {
 
-                            List<KhungGio> danhSachCapNhat = sanBongHienTai.getDanhSachKhungGio();
+                        List<KhungGio> danhSachCapNhat = sanBongHienTai.getDanhSachKhungGio();
+                        if (viTriChon >= 0 && viTriChon < danhSachCapNhat.size()) {
                             danhSachCapNhat.get(viTriChon).setDaDat(true);
-
-                            db.collection("DanhSachSanBong").document(documentIdCuaSan)
-                                    .update("danhSachKhungGio", danhSachCapNhat)
+                            mDatabaseSanBong.child(documentIdCuaSan).child("danhSachKhungGio")
+                                    .setValue(danhSachCapNhat)
                                     .addOnSuccessListener(aVoid -> {
-
                                         luuHoaDonBookingVaoRealtimeDB();
                                     })
                                     .addOnFailureListener(e -> {
                                         btnXacNhanThanhToan.setEnabled(true);
                                         Toast.makeText(PaymentActivity.this, "Lỗi cập nhật lịch: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                     });
+                        } else {
+                            btnXacNhanThanhToan.setEnabled(true);
+                            Toast.makeText(PaymentActivity.this, "Lỗi: Vị trí ca chọn không hợp lệ!", Toast.LENGTH_SHORT).show();
                         }
                     }
-                });
+                } else {
+                    btnXacNhanThanhToan.setEnabled(true);
+                    Toast.makeText(PaymentActivity.this, "Sân bóng này không tồn tại trên dữ liệu!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                btnXacNhanThanhToan.setEnabled(true);
+                Toast.makeText(PaymentActivity.this, "Lỗi kết nối DB: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
     private void luuHoaDonBookingVaoRealtimeDB() {
         SimpleDateFormat sdfGio = new SimpleDateFormat("HH:mm", Locale.getDefault());
         String strGioBatDau = sdfGio.format(new Date(gioBatDauLong));
         String strGioKetThuc = sdfGio.format(new Date(gioKetThucLong));
-        String bookingId = realtimeDb.child("Bookings").push().getKey();
+
+        String bookingId = mDatabaseBookings.push().getKey();
 
         if (bookingId == null) {
             btnXacNhanThanhToan.setEnabled(true);
@@ -194,8 +225,7 @@ public class PaymentActivity extends AppCompatActivity {
                 System.currentTimeMillis()
         );
 
-        //  đẩy object lên  Bookings
-        realtimeDb.child("Bookings").child(bookingId).setValue(newBooking)
+        mDatabaseBookings.child(bookingId).setValue(newBooking)
                 .addOnSuccessListener(unused -> {
                     datLichNhacNho(gioBatDauLong, tenSan);
                     Toast.makeText(PaymentActivity.this, "Đặt sân và thanh toán thành công!", Toast.LENGTH_LONG).show();

@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide; // Thêm import thư viện Glide để load URL mạng
 import com.example.datsanbong.models.Booking;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
@@ -24,7 +25,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,8 +40,8 @@ public class DetailActivity extends AppCompatActivity {
     private Button btnChonNgay, btnDatSan;
     private Spinner spinnerKhungGio;
 
-    private FirebaseFirestore db;
-    private DatabaseReference realtimeDb;
+    private DatabaseReference mDatabaseSanBong;
+    private DatabaseReference mDatabaseBookings;
     private ValueEventListener bookingListener;
 
     private SanBong sanBongHienTai;
@@ -51,9 +51,13 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        mDatabaseSanBong = FirebaseDatabase.getInstance()
+                .getReferenceFromUrl("https://datsanbong-b6ad1-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .child("DanhSachSanBong");
 
-        db = FirebaseFirestore.getInstance();
-        realtimeDb = FirebaseDatabase.getInstance().getReference().child("Bookings");
+        mDatabaseBookings = FirebaseDatabase.getInstance()
+                .getReferenceFromUrl("https://datsanbong-b6ad1-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .child("Bookings");
 
         Button btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
@@ -76,7 +80,24 @@ public class DetailActivity extends AppCompatActivity {
             Object giaSanObj = bundle.get("giaSan");
             txtGiaSan.setText(giaSanObj != null ? giaSanObj.toString() + " đ/trận" : "");
 
-            imgSan.setImageResource(bundle.getInt("hinhAnh"));
+            String imageStr = bundle.getString("hinhAnh");
+
+            if (imageStr != null && (imageStr.startsWith("http://") || imageStr.startsWith("https://"))) {
+                Glide.with(this)
+                        .load(imageStr)
+                        .placeholder(R.drawable.san5)
+                        .error(R.drawable.san5)
+                        .into(imgSan);
+            } else if (imageStr != null && !imageStr.isEmpty()) {
+                int resId = getResources().getIdentifier(imageStr, "drawable", getPackageName());
+                if (resId != 0) {
+                    imgSan.setImageResource(resId);
+                } else {
+                    imgSan.setImageResource(R.drawable.san5);
+                }
+            } else {
+                imgSan.setImageResource(R.drawable.san5);
+            }
             documentIdCuaSan = bundle.getString("documentId");
         }
 
@@ -92,77 +113,86 @@ public class DetailActivity extends AppCompatActivity {
         btnChonNgay.setOnClickListener(v -> showDatePicker());
         btnDatSan.setOnClickListener(v -> xuLyDatSanFirebase());
     }
+
     private void langNgheBookingRealtimeTheoNgay(String ngayDuocChon) {
         if (documentIdCuaSan == null || documentIdCuaSan.isEmpty()) {
-            Toast.makeText(this, "Lỗi: Không tìm thấy ID mã sân!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Lỗi: Không tìm thấy khóa ID của sân bóng!", Toast.LENGTH_SHORT).show();
             return;
         }
         if (bookingListener != null) {
-            realtimeDb.removeEventListener(bookingListener);
+            mDatabaseBookings.removeEventListener(bookingListener);
         }
-        db.collection("DanhSachSanBong").document(documentIdCuaSan).get().addOnSuccessListener(documentSnapshot -> {
-            List<KhungGio> listGioHienTai = new ArrayList<>();
+        mDatabaseSanBong.child(documentIdCuaSan).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<KhungGio> listGioHienTai = new ArrayList<>();
 
-            if (documentSnapshot.exists()) {
-                sanBongHienTai = documentSnapshot.toObject(SanBong.class);
-                if (sanBongHienTai != null && sanBongHienTai.getDanhSachKhungGio() != null) {
-                    listGioHienTai = sanBongHienTai.getDanhSachKhungGio();
-                }
-            }
-
-            if (listGioHienTai.isEmpty()) {
-                listGioHienTai = taoDanhSachCaMacDinh();
-                if (sanBongHienTai == null) {
-                    int idInt = (int) (System.currentTimeMillis() / 1000);
-                    sanBongHienTai = new SanBong(idInt, txtTenSan.getText().toString(), txtDiaChi.getText().toString(), 300000, "", listGioHienTai);
-                    db.collection("DanhSachSanBong").document(documentIdCuaSan).set(sanBongHienTai);
-                } else {
-                    sanBongHienTai.setDanhSachKhungGio(listGioHienTai);
-                    db.collection("DanhSachSanBong").document(documentIdCuaSan).update("danhSachKhungGio", listGioHienTai);
-                }
-            }
-
-            final List<KhungGio> danhSachGoc = listGioHienTai;
-            int sanId = sanBongHienTai != null ? sanBongHienTai.getId() : 0;
-            bookingListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (KhungGio kg : danhSachGoc) {
-                        kg.setDaDat(false);
+                if (snapshot.exists()) {
+                    sanBongHienTai = snapshot.getValue(SanBong.class);
+                    if (sanBongHienTai != null && sanBongHienTai.getDanhSachKhungGio() != null) {
+                        listGioHienTai = sanBongHienTai.getDanhSachKhungGio();
                     }
-                    for (DataSnapshot data : snapshot.getChildren()) {
-                        Booking booking = data.getValue(Booking.class);
-                        if (booking != null) {
-                            if (booking.getSanBongId() == sanId && ngayDuocChon.equals(booking.getNgayDat())) {
-                                if ("CANCELLED".equals(booking.getTrangThai())) {
-                                    continue;
-                                }
-                                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                for (KhungGio kg : danhSachGoc) {
-                                    String gioBatDauSankh = sdf.format(new Date(kg.getGioBatDau()));
-                                    String gioKetThucSankh = sdf.format(new Date(kg.getGioKetThuc()));
+                }
+                if (listGioHienTai.isEmpty()) {
+                    listGioHienTai = taoDanhSachCaMacDinh();
+                    if (sanBongHienTai == null) {
+                        int idInt = (int) (System.currentTimeMillis() / 1000);
+                        sanBongHienTai = new SanBong(idInt, txtTenSan.getText().toString(), txtDiaChi.getText().toString(), 300000, "", listGioHienTai);
+                        mDatabaseSanBong.child(documentIdCuaSan).setValue(sanBongHienTai);
+                    } else {
+                        sanBongHienTai.setDanhSachKhungGio(listGioHienTai);
+                        mDatabaseSanBong.child(documentIdCuaSan).child("danhSachKhungGio").setValue(listGioHienTai);
+                    }
+                }
 
-                                    if (gioBatDauSankh.equals(booking.getGioBatDau()) && gioKetThucSankh.equals(booking.getGioKetThuc())) {
-                                        kg.setDaDat(true);
+                final List<KhungGio> danhSachGoc = listGioHienTai;
+                int sanId = sanBongHienTai != null ? sanBongHienTai.getId() : 0;
+                bookingListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot bookingSnapshot) {
+                        for (KhungGio kg : danhSachGoc) {
+                            kg.setDaDat(false);
+                        }
+                        for (DataSnapshot data : bookingSnapshot.getChildren()) {
+                            Booking booking = data.getValue(Booking.class);
+                            if (booking != null) {
+                                if (booking.getSanBongId() == sanId && ngayDuocChon.equals(booking.getNgayDat())) {
+                                    if ("CANCELLED".equals(booking.getTrangThai())) {
+                                        continue;
+                                    }
+
+                                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                    for (KhungGio kg : danhSachGoc) {
+                                        String gioBatDauSankh = sdf.format(new Date(kg.getGioBatDau()));
+                                        String gioKetThucSankh = sdf.format(new Date(kg.getGioKetThuc()));
+
+                                        if (gioBatDauSankh.equals(booking.getGioBatDau()) && gioKetThucSankh.equals(booking.getGioKetThuc())) {
+                                            kg.setDaDat(true);
+                                        }
                                     }
                                 }
                             }
                         }
+                        CustomKhungGioAdapter adapter = new CustomKhungGioAdapter(
+                                DetailActivity.this,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                danhSachGoc
+                        );
+                        spinnerKhungGio.setAdapter(adapter);
                     }
-                    CustomKhungGioAdapter adapter = new CustomKhungGioAdapter(
-                            DetailActivity.this,
-                            android.R.layout.simple_spinner_dropdown_item,
-                            danhSachGoc
-                    );
-                    spinnerKhungGio.setAdapter(adapter);
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(DetailActivity.this, "Lỗi đồng bộ dữ liệu Realtime!", Toast.LENGTH_SHORT).show();
-                }
-            };
-            realtimeDb.addValueEventListener(bookingListener);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(DetailActivity.this, "Lỗi đồng bộ lịch đặt sân!", Toast.LENGTH_SHORT).show();
+                    }
+                };
+                mDatabaseBookings.addValueEventListener(bookingListener);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(DetailActivity.this, "Không thể tải thông tin sân!", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -243,7 +273,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (bookingListener != null) {
-            realtimeDb.removeEventListener(bookingListener);
+            mDatabaseBookings.removeEventListener(bookingListener);
         }
     }
 

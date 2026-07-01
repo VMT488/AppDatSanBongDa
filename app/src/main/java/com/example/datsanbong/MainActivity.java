@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -13,15 +11,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.datsanbong.adapters.SanBongAdapter;
 import com.example.datsanbong.models.SanBong;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_admin) {
-                Intent intent = new Intent(MainActivity.this, AdminRevenueActivity.class);
+                Intent intent = new Intent(MainActivity.this, AdminActivity.class);
                 startActivity(intent);
                 return true;
             } else if (id == R.id.nav_home) {
@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+
         sanBongAdapter.setOnItemClickListener(sanBong -> {
             Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
@@ -91,21 +92,30 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("diaChi", sanBong.getDiaChi());
             intent.putExtra("giaSan", sanBong.getGiaSan());
             intent.putExtra("hinhAnh", sanBong.getHinhAnh());
-            intent.putExtra("documentId", String.valueOf(sanBong.getId()));
+            intent.putExtra("documentId", sanBong.getRealtimeKey());
 
             startActivity(intent);
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        }
+    }
+
     private void listenFirebase() {
         db.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 mListSanBong.clear();
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     SanBong sanBong = dataSnapshot.getValue(SanBong.class);
                     if (sanBong != null) {
+                        sanBong.setRealtimeKey(dataSnapshot.getKey());
                         mListSanBong.add(sanBong);
                     }
                 }
@@ -120,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

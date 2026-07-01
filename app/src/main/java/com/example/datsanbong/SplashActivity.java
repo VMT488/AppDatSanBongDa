@@ -24,92 +24,59 @@ public class SplashActivity extends AppCompatActivity {
         userRef = FirebaseDatabase.getInstance().getReference("Users");
 
         FirebaseUser firebaseUser = auth.getCurrentUser();
-
-        // Chưa đăng nhập
         if (firebaseUser == null) {
             openLogin();
             return;
         }
-
-        // Đã đăng nhập -> kiểm tra trạng thái trên Realtime Database
         checkUser(firebaseUser.getUid());
     }
-
     private void checkUser(String uid) {
+        userRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    auth.signOut();
+                    openLogin();
+                    return;
+                }
 
-        userRef.child(uid)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+                User user = snapshot.getValue(User.class);
+                if (user == null) {
+                    auth.signOut();
+                    openLogin();
+                    return;
+                }
+                if (!user.isActive()) {
+                    Toast.makeText(
+                            SplashActivity.this,
+                            "Tài khoản đã bị khóa!",
+                            Toast.LENGTH_SHORT
+                    ).show();
 
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
+                    auth.signOut();
+                    openLogin();
+                    return;
+                }
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
 
-                        if (!snapshot.exists()) {
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Toast.makeText(
+                        SplashActivity.this,
+                        error.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
 
-                            auth.signOut();
-                            openLogin();
-                            return;
-                        }
-
-                        User user = snapshot.getValue(User.class);
-
-                        if (user == null) {
-
-                            auth.signOut();
-                            openLogin();
-                            return;
-                        }
-
-                        // Kiểm tra tài khoản bị khóa
-                        if (!user.isActive()) {
-
-                            Toast.makeText(
-                                    SplashActivity.this,
-                                    "Tài khoản đã bị khóa",
-                                    Toast.LENGTH_SHORT
-                            ).show();
-
-                            auth.signOut();
-                            openLogin();
-                            return;
-                        }
-
-                        // Điều hướng theo role
-                        if ("ADMIN".equals(user.getRole())) {
-
-                            startActivity(new Intent(
-                                    SplashActivity.this,
-                                    AdminActivity.class));
-
-                        } else {
-
-                            startActivity(new Intent(
-                                    SplashActivity.this,
-                                    MainActivity.class));
-                        }
-
-                        finish();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-
-                        Toast.makeText(
-                                SplashActivity.this,
-                                error.getMessage(),
-                                Toast.LENGTH_SHORT
-                        ).show();
-
-                        openLogin();
-                    }
-                });
+                openLogin();
+            }
+        });
     }
 
     private void openLogin() {
-
-        startActivity(new Intent(
-                SplashActivity.this,
-                LoginActivity.class));
-
+        startActivity(new Intent(SplashActivity.this, LoginActivity.class));
         finish();
     }
 }
