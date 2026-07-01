@@ -11,7 +11,7 @@ import com.example.datsanbong.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
     private TextView txtName;
     private TextView txtUsername;
@@ -29,6 +29,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        setupToolbar("Thông tin tài khoản");
 
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -314,13 +314,11 @@ public class LoginActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot snapshot) {
 
                         if (!snapshot.exists()) {
-
                             Toast.makeText(
                                     LoginActivity.this,
                                     "Không tìm thấy thông tin người dùng",
                                     Toast.LENGTH_SHORT
                             ).show();
-
                             return;
                         }
 
@@ -337,46 +335,24 @@ public class LoginActivity extends AppCompatActivity {
                             ).show();
 
                             auth.signOut();
-
                             return;
                         }
 
-                        if ("ADMIN".equals(user.getRole())) {
-
-                            startActivity(
-                                    new Intent(
-                                            LoginActivity.this,
-                                            AdminActivity.class
-                                    )
-                            );
-
-                        } else {
-
-                            startActivity(
-                                    new Intent(
-                                            LoginActivity.this,
-                                            MainActivity.class
-                                    )
-                            );
-
-                        }
+                        startActivity(new Intent(
+                                LoginActivity.this,
+                                MainActivity.class
+                        ));
 
                         finish();
-
                     }
 
                     @Override
                     public void onCancelled(DatabaseError error) {
 
-                        Toast.makeText(
-                                LoginActivity.this,
-                                error.getMessage(),
-                                Toast.LENGTH_SHORT
-                        ).show();
-
                     }
-
                 });
+
+
 
     }
     @Override

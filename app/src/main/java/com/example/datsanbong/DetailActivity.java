@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends BaseActivity {
 
     private ImageView imgSan;
     private TextView txtTenSan, txtDiaChi, txtGiaSan, txtNgayDat;
@@ -43,11 +43,9 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-
+        setupToolbar("Chi tiết sân");
         db = FirebaseFirestore.getInstance();
 
-        Button btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
 
         imgSan = findViewById(R.id.imgDetailSan);
         txtTenSan = findViewById(R.id.txtDetailTenSan);
