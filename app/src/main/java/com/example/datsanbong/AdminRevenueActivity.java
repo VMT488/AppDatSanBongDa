@@ -16,6 +16,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.datsanbong.models.Booking;
+import com.example.datsanbong.services.RoleManager;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -59,7 +60,21 @@ public class AdminRevenueActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_revenue);
+        RoleManager roleManager = new RoleManager();
 
+        roleManager.checkAdmin(admin -> {
+
+            if (!admin) {
+                Toast.makeText(
+                        this,
+                        "Bạn không có quyền truy cập",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+            }
+
+        });
         btnStartDate = findViewById(R.id.btnStartDate);
         btnEndDate = findViewById(R.id.btnEndDate);
         tvTotalRevenue = findViewById(R.id.tvTotalRevenue);
@@ -78,7 +93,10 @@ public class AdminRevenueActivity extends AppCompatActivity {
 
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_quan_ly_san) {
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, MainActivity.class));
+                finish();
+            } else if (id == R.id.nav_quan_ly_san) {
                 startActivity(new Intent(AdminRevenueActivity.this, AdminActivity.class));
             } else if (id == R.id.nav_manage_customers) {
                 startActivity(new Intent(AdminRevenueActivity.this, AdminCustomerActivity.class));

@@ -4,10 +4,8 @@ public class Booking {
     private String id;
     private String userId;
     private int sanBongId;
-
     private String tenSan;
     private String tenNguoiDat;
-
     private String ngayDat;
     private String gioBatDau;
     private String gioKetThuc;

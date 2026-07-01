@@ -15,6 +15,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
+import com.example.datsanbong.services.RoleManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -30,8 +31,22 @@ public class AdminActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
+        RoleManager roleManager = new RoleManager();
 
-        mDatabase = FirebaseDatabase.getInstance().getReference("DanhSachSanBong");
+        roleManager.checkAdmin(admin -> {
+
+            if (!admin) {
+                Toast.makeText(
+                        this,
+                        "Bạn không có quyền truy cập",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+            }
+
+        });
+        mDatabase = FirebaseDatabase.getInstance().getReference("SanBong");
 
         Button btnThemSan = findViewById(R.id.btnThemSan);
         Toolbar toolbarAdmin = findViewById(R.id.toolbarAdmin);
@@ -48,8 +63,10 @@ public class AdminActivity extends AppCompatActivity {
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int id = item.getItemId();
-
-                if (id == R.id.nav_quan_ly_san) {
+                if (id == R.id.nav_home) {
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                } else if (id == R.id.nav_quan_ly_san) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                 } else if (id == R.id.nav_thong_ke) {
                     drawerLayout.closeDrawer(GravityCompat.START);

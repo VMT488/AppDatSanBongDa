@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.datsanbong.adapters.UserAdapter;
 import com.example.datsanbong.models.User;
+import com.example.datsanbong.services.RoleManager;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,12 +33,27 @@ public class AdminCustomerActivity extends AppCompatActivity {
     private List<User> userList;
     private DatabaseReference mDatabase;
     private DrawerLayout drawerLayout;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_customer);
+        RoleManager roleManager = new RoleManager();
 
+        roleManager.checkAdmin(admin -> {
+
+            if (!admin) {
+                Toast.makeText(
+                        this,
+                        "Bạn không có quyền truy cập",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+            }
+
+        });
         Toolbar toolbar = findViewById(R.id.toolbarCustomer);
         setSupportActionBar(toolbar);
 
@@ -51,8 +68,10 @@ public class AdminCustomerActivity extends AppCompatActivity {
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int id = item.getItemId();
-
-                if (id == R.id.nav_quan_ly_san) {
+                if (id == R.id.nav_home) {
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                } else if (id == R.id.nav_quan_ly_san) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     Intent intent = new Intent(AdminCustomerActivity.this, AdminActivity.class);
                     startActivity(intent);
