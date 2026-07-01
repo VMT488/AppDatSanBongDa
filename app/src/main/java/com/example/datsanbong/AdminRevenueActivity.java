@@ -177,14 +177,14 @@ public class AdminRevenueActivity extends AppCompatActivity {
 
                     // 3. Kiểm tra điều kiện ngày tháng và trạng thái đơn hàng
                     if (!date.isEmpty() && isDateInRange(date, startDate, endDate)) {
-                        if ("CONFIRMED".equals(status) || "COMPLETED".equals(status)) {
+                        if ("CONFIRMED".equals(status)) {
                             totalRevenue += tongTien;
                             successCount++;
 
                             long currentDayRevenue = dailyRevenueMap.getOrDefault(date, 0L);
                             dailyRevenueMap.put(date, currentDayRevenue + tongTien);
 
-                        } else if ("CANCELLED".equals(status)) {
+                        } else if ("PENDING".equals(status)) {
                             cancelCount++;
                         }
                     }

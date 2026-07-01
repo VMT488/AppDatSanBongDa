@@ -26,6 +26,14 @@
         android:layout_marginBottom="12dp"/>
 
     <EditText
+        android:id="@+id/edtLoaiSan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nhập loại sân (Ví dụ: Sân 5, Sân 7...)"
+        android:inputType="text"
+        android:layout_marginTop="8dp" />
+
+    <EditText
         android:id="@+id/edtDiaChi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
