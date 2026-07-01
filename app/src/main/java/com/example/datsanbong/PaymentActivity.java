@@ -28,6 +28,7 @@ import com.example.datsanbong.models.Booking;
 import com.example.datsanbong.models.KhungGio;
 import com.example.datsanbong.models.SanBong;
 import com.example.datsanbong.receivers.NotificationReceiver;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,6 +61,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabaseSanBong;
     private DatabaseReference mDatabaseBookings;
+    private FirebaseAuth mAuth;
 
     private final ActivityResultLauncher<String> requestNotificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -79,7 +81,7 @@ public class PaymentActivity extends AppCompatActivity {
         String dbUrl = "https://datsanbong-b6ad1-default-rtdb.asia-southeast1.firebasedatabase.app/";
         mDatabaseSanBong = FirebaseDatabase.getInstance(dbUrl).getReference("DanhSachSanBong");
         mDatabaseBookings = FirebaseDatabase.getInstance(dbUrl).getReference("Bookings");
-
+        mAuth = FirebaseAuth.getInstance();
         txtPayTenSan = findViewById(R.id.txtPayTenSan);
         txtPayNgayCa = findViewById(R.id.txtPayNgayCa);
         txtPayTongTien = findViewById(R.id.txtPayTongTien);
@@ -197,6 +199,12 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void luuHoaDonBookingVaoRealtimeDB() {
+        if (mAuth.getCurrentUser() == null) {
+            btnXacNhanThanhToan.setEnabled(true);
+            Toast.makeText(this, "Lỗi: Bạn cần đăng nhập để thực hiện chức năng này!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String currentUserId = mAuth.getCurrentUser().getUid();
         SimpleDateFormat sdfGio = new SimpleDateFormat("HH:mm", Locale.getDefault());
         String strGioBatDau = sdfGio.format(new Date(gioBatDauLong));
         String strGioKetThuc = sdfGio.format(new Date(gioKetThucLong));
@@ -213,7 +221,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         Booking newBooking = new Booking(
                 bookingId,
-                "USER_TEST_ID",
+                currentUserId,
                 sanBongId,
                 tenSan,
                 "Khách hàng Mobile (" + phuongThucThanhToan + ")",
