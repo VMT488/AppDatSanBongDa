@@ -51,6 +51,7 @@ public class DetailActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        setupToolbar("Chi tiết sân");
         mDatabaseSanBong = FirebaseDatabase.getInstance()
                 .getReferenceFromUrl("https://datsanbong-b6ad1-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .child("DanhSachSanBong");
@@ -75,7 +76,7 @@ public class DetailActivity extends BaseActivity {
             txtTenSan.setText(bundle.getString("tenSan"));
             txtDiaChi.setText(bundle.getString("diaChi"));
 
-            // BỔ SUNG: Lấy dữ liệu loại sân từ Adapter truyền sang
+            //Lấy dữ liệu loại sân từ Adapter truyền sang
             String loaiSanStr = bundle.getString("loaiSan");
             if (loaiSanStr != null && !loaiSanStr.isEmpty()) {
                 txtLoaiSan.setText("Loại sân: " + loaiSanStr);
